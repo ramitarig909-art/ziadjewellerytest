@@ -119,8 +119,8 @@ section[id],header[id]{scroll-margin-top:84px}
 @keyframes preLine{to{width:220px}}
 .pre-sub{position:relative;z-index:2;font-size:.66rem;letter-spacing:.5em;text-transform:uppercase;color:rgba(231,217,190,.7);margin-top:1.1rem;opacity:0;animation:preIn 1s var(--ease) 1s forwards}
 .pre-sparks{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.spark{position:absolute;background:linear-gradient(120deg,#fbeec0,#d8b25a);opacity:0;transform:translate(0,0) scale(0) rotate(0deg);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:twinkle var(--dur,3s) ease-in-out var(--del,0s) infinite;filter:drop-shadow(0 0 5px rgba(216,178,90,.75))}
-@keyframes twinkle{0%{opacity:0;transform:translate(0,0) scale(.2) rotate(0deg)}50%{opacity:.95;transform:translate(var(--x,14px),var(--y,-18px)) scale(1) rotate(180deg)}100%{opacity:0;transform:translate(calc(var(--x,14px)*2),calc(var(--y,-18px)*2)) scale(.2) rotate(360deg)}}
+.spark{position:absolute;background:linear-gradient(120deg,#fbeec0,#d8b25a);opacity:0;transform:scale(0) rotate(0deg);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:twinkle var(--dur,3s) ease-in-out var(--del,0s) infinite;filter:drop-shadow(0 0 5px rgba(216,178,90,.75))}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.2) rotate(0deg)}50%{opacity:.95;transform:scale(1) rotate(45deg)}}
 
 /* Nav */
 .nav{position:fixed;top:0;left:0;width:100%;z-index:900;padding:1.15rem 0;transition:all .5s var(--ease);border-bottom:1px solid transparent}
@@ -373,49 +373,6 @@ html[dir="rtl"] .hero p,html[dir="rtl"] .contact-info > p{margin-left:auto;margi
   .prod-body{padding:1rem}
   .prod-body h3{font-size:1.05rem}
   .about-stats{gap:1.6rem}
-  .prod-actions{flex-wrap:wrap}
-  .prod-actions .btn{min-width:100%}
-  .icon-btn{width:100% !important}
-  .nav-links{width:min(82vw,300px)}
-}
-@media(max-width:480px){
-  .wrap{padding:0 1.1rem}
-  .section{padding:3.4rem 0}
-  .nav-inner{gap:.5rem}
-  .brand-logo{height:34px}
-  .nav.scrolled .brand-logo{height:30px}
-  .nav-controls{gap:.5rem}
-  .lang-btn{padding:.4rem .6rem;font-size:.66rem;min-width:38px;min-height:36px}
-  .hero h1{font-size:clamp(2.1rem,9vw,3rem)}
-  .hero p{font-size:.95rem;max-width:none}
-  .hero-cta{flex-direction:column;align-items:stretch}
-  .hero-cta .btn{width:100%}
-  .hero-figure{aspect-ratio:4/5;max-height:52vh}
-  .head h2{font-size:clamp(1.8rem,8vw,2.6rem)}
-  .col-grid{grid-template-columns:1fr;gap:.9rem}
-  .prod-grid{grid-template-columns:1fr;gap:1rem}
-  .prod-body h3{font-size:1.15rem}
-  .prod-actions{flex-direction:column}
-  .prod-actions .btn{width:100%}
-  .icon-btn{width:100% !important;height:44px}
-  .about-stats{justify-content:space-between;gap:1rem}
-  .stat .n{font-size:1.9rem}
-  .rev-card{padding:1.5rem}
-  .why-card{padding:1.8rem 1.2rem}
-  .contact-cta{flex-direction:column;align-items:stretch}
-  .contact-cta .btn{width:100%}
-  .contact-socials{justify-content:flex-start}
-  .map-wrap,.map-wrap iframe{min-height:300px}
-  .modal-box{max-height:94vh}
-  .m-info{padding:1.4rem}
-  .m-info h3{font-size:1.5rem}
-  .m-thumbs img{width:48px;height:48px}
-  .m-nav{width:36px;height:36px;font-size:1.3rem}
-  .cp-hero{aspect-ratio:auto;min-height:200px}
-  .cp-hero .cp-meta{padding:1.4rem}
-  .wa-float{width:52px;height:52px;right:1rem;bottom:1rem}
-  .wa-float svg{width:26px;height:26px}
-  .footer .foot-logo{height:42px}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
@@ -628,7 +585,6 @@ html[dir="rtl"] .hero p,html[dir="rtl"] .contact-info > p{margin-left:auto;margi
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892z"/></svg>
           <span id="mAskTxt">Ask About This Product</span>
         </button>
-        <button class="btn btn-ghost" id="mShare"><span id="mShareTxt">Share via WhatsApp</span></button>
       </div>
     </div>
   </div>
@@ -859,10 +815,7 @@ const reviews=[
 function waLink(m){return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(m)}`;}
 function productLink(p){return `${SITE_URL}#product=${p.id}`;}
 function askMessage(p){
-  return `Hello ZIAD Jewellery — I'd like more information about this product.\nمرحباً زياد للمجوهرات — أرغب في مزيد من المعلومات عن هذا المنتج.\n\nProduct / المنتج: ${p.name} / ${p.name_ar}\nPrice / السعر: ${p.price}\nLink / الرابط: ${productLink(p)}`;
-}
-function shareMessage(p){
-  return `Take a look at this piece from ZIAD Jewellery ✨\nألقِ نظرة على هذه القطعة من زياد للمجوهرات ✨\n\n${p.name} / ${p.name_ar} — ${p.price}\n${productLink(p)}`;
+  return `Hi, I am interested in this product / مرحباً، أنا مهتم بهذا المنتج\\n\\nProduct / المنتج: ${p.name} / ${p.name_ar}\\nPrice / السعر: ${p.price}`;
 }
 function generalMessage(){return "Hello ZIAD Jewellery — I'd like more information about your collections.\nمرحباً زياد للمجوهرات — أرغب في مزيد من المعلومات عن مجموعاتكم.";}
 
@@ -950,9 +903,7 @@ function fillModal(p){
   const weight=LANG==='ar'?(p.weight_ar||'عند الطلب'):(p.weight||'On request');
   specs.innerHTML=`<div class="row"><span class="k">${T.spec_gold[LANG]}</span><span class="v">${gold}</span></div><div class="row"><span class="k">${T.spec_weight[LANG]}</span><span class="v">${weight}</span></div>`;
   document.getElementById('mAskTxt').textContent=T.ask_btn[LANG];
-  document.getElementById('mShareTxt').textContent=T.share_btn[LANG];
   document.getElementById('mAsk').onclick=()=>window.open(waLink(askMessage(p)),'_blank','noopener');
-  document.getElementById('mShare').onclick=()=>window.open(waLink(shareMessage(p)),'_blank','noopener');
   const multi=modalList.length>1;
   document.getElementById('mPrev').style.display=multi?'flex':'none';
   document.getElementById('mNext').style.display=multi?'flex':'none';
@@ -1047,9 +998,7 @@ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let html='';
   for(let i=0;i<46;i++){
     const sz=(4+Math.random()*13).toFixed(1);
-    const dx=((Math.random()-0.5)*120).toFixed(0);
-    const dy=(-40-Math.random()*100).toFixed(0);
-    html+=`<span class="spark" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;width:${sz}px;height:${sz}px;--dur:${(2.2+Math.random()*3.2).toFixed(2)}s;--del:${(Math.random()*4).toFixed(2)}s;--x:${dx}px;--y:${dy}px"></span>`;
+    html+=`<span class="spark" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%;width:${sz}px;height:${sz}px;--dur:${(2.2+Math.random()*3.2).toFixed(2)}s;--del:${(Math.random()*4).toFixed(2)}s"></span>`;
   }
   box.innerHTML=html;
 })();
