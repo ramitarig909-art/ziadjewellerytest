@@ -815,7 +815,10 @@ const reviews=[
 function waLink(m){return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(m)}`;}
 function productLink(p){return `${SITE_URL}#product=${p.id}`;}
 function askMessage(p){
-  return `Hi, I am interested in this product / مرحباً، أنا مهتم بهذا المنتج\\n\\nProduct / المنتج: ${p.name} / ${p.name_ar}\\nPrice / السعر: ${p.price}`;
+  const name = p.name || '';
+  const nameAr = p.name_ar || '';
+  const price = p.price || '';
+  return `Hello ZIAD Jewellery,\nI am interested in this piece and would like more details.\nItem: ${name}\nPrice: ${price}\n---\nمرحباً زياد للمجوهرات،\nأنا مهتم بهذه القطعة وأود معرفة المزيد من التفاصيل.\nاسم القطعة: ${nameAr}\nالسعر: ${price}`;
 }
 function generalMessage(){return "Hello ZIAD Jewellery — I'd like more information about your collections.\nمرحباً زياد للمجوهرات — أرغب في مزيد من المعلومات عن مجموعاتكم.";}
 
