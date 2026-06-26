@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Dashboard · ZIAD Jewellery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar (desktop) / Drawer (mobile) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="side-brand">
+        <div class="logo">ZIAD<b>.</b></div>
+        <small>Admin Dashboard</small>
+      </div>
+      <nav class="side-nav" id="sideNav">
+        <a data-route="dashboard"><span class="ic">▱</span> Dashboard</a>
+        <a data-route="products"><span class="ic">◈</span> Products</a>
+        <a data-route="categories"><span class="ic">≡</span> Categories</a>
+        <a data-route="homepage"><span class="ic">⌂</span> Homepage</a>
+        <a data-route="about"><span class="ic">✎</span> About</a>
+        <a data-route="contact"><span class="ic">✆</span> Contact</a>
+        <a data-route="orders"><span class="ic">🛍</span> Orders</a>
+        <a data-route="settings"><span class="ic">⚙</span> Settings</a>
+      </nav>
+      <div class="side-foot">
+        <div class="who" id="whoami">…</div>
+        <button class="btn-ghost-sm" id="logoutBtn" style="width:100%">⎋ Logout</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+        <div class="logo">ZIAD<b style="color:var(--gold-deep)">.</b></div>
+      </div>
+      <div class="content" id="view"><!-- views render here --></div>
+    </div>
+  </div>
+
+  <script src="/assets/js/lib/config.js"></script>
+  <script type="module" src="/assets/js/admin/app.js"></script>
+</body>
+</html>
