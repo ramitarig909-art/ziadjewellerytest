@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Import existing products · ZIAD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ivory:#FAF6EF;--espresso:#241F1A;--ink:#2E2922;--gold:#B8923D;--gold-bright:#D8B25A;
+  --gold-deep:#977629;--muted:#7d7568;--line-soft:rgba(36,31,26,.10);--ok:#5b7a4f;--warn:#a8442e;
+  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Jost',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);font-weight:300;color:var(--espresso);background:var(--ivory);line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:2.5rem 1.4rem 4rem}
+h1{font-family:var(--serif);font-size:2.1rem;font-weight:400}
+.sub{color:var(--muted);margin:.3rem 0 1.6rem}
+.card{background:#fff;border:1px solid var(--line-soft);border-radius:5px;padding:1.6rem;margin-bottom:1.4rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:inherit;font-size:.8rem;letter-spacing:.1em;
+  text-transform:uppercase;cursor:pointer;padding:.85rem 1.6rem;border:none;border-radius:2px;
+  background:linear-gradient(120deg,var(--gold-deep),var(--gold),var(--gold-bright));color:#241402;font-weight:500}
+.btn:disabled{opacity:.55;cursor:default}
+.btn-ghost{background:none;border:1px solid var(--line-soft);color:var(--ink)}
+.bar{height:10px;background:#eee;border-radius:6px;overflow:hidden;margin:1rem 0 .5rem}
+.bar > div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-bright));transition:width .2s}
+.count{font-size:.85rem;color:var(--muted)}
+.log{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;background:#1d1916;color:#e9dcc4;
+  border-radius:4px;padding:1rem;height:300px;overflow-y:auto;white-space:pre-wrap;margin-top:1rem}
+.log .ok{color:#9bd4a0}.log .skip{color:#cdbf9a}.log .err{color:#e79b8e}
+a.back{color:var(--gold-deep);font-size:.8rem;text-decoration:none}
+.note{font-size:.85rem;color:var(--muted);margin-top:1rem;line-height:1.6}
+.done{background:#eef2ea;color:var(--ok);border-radius:4px;padding:1rem;margin-top:1rem;display:none}
+.done.show{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/admin/dashboard.html">← Back to dashboard</a>
+  <h1 style="margin-top:.6rem">Import existing products</h1>
+  <p class="sub">This reads the products currently on your website and copies them into your dashboard
+    so you can edit them. Photos are uploaded to your storage automatically.</p>
+
+  <div class="card">
+    <button class="btn" id="runBtn">Import products from website</button>
+    <button class="btn btn-ghost" id="recheckBtn" style="margin-left:.6rem">Re-check</button>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="count" id="count">Ready.</div>
+    <div class="done" id="done"></div>
+    <div class="log" id="log"></div>
+    <p class="note"><b>Safe to run more than once</b> — products already imported are skipped, never duplicated.
+      When it finishes, open the dashboard and you'll see every product, ready to edit. You can then delete this page if you like.</p>
+  </div>
+</div>
+
+<script src="/assets/js/lib/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const cfg = window.ZIAD_SUPABASE || {};
+const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+const BUCKET = "product-images";
+
+const logEl = document.getElementById("log");
+const barFill = document.getElementById("barFill");
+const countEl = document.getElementById("count");
+const doneEl = document.getElementById("done");
+
+function log(msg, cls=""){ logEl.innerHTML += `<span class="${cls}">${msg}</span>\n`; logEl.scrollTop = logEl.scrollHeight; }
+
+/* ---- auth guard ---- */
+(async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ window.location.replace("/admin/login.html"); }
+})();
+
+/* ---- balanced literal extractor (skips string contents) ---- */
+function sliceBalanced(src, fromIdx, open, close){
+  let i = src.indexOf(open, fromIdx), start = i, depth = 0, inStr = null;
+  for(; i < src.length; i++){
+    const ch = src[i], prev = src[i-1];
+    if(inStr){ if(ch === inStr && prev !== "\\") inStr = null; continue; }
+    if(ch === "'" || ch === '"' || ch === "`"){ inStr = ch; continue; }
+    if(ch === open) depth++;
+    else if(ch === close){ depth--; if(depth === 0){ i++; break; } }
+  }
+  return src.slice(start, i);
+}
+function extractAssignment(src, varName, open, close){
+  const re = new RegExp("(?:const|let|var)\\s+" + varName + "\\s*=");
+  const m = re.exec(src);
+  if(!m) return null;
+  return sliceBalanced(src, m.index + m[0].length, open, close);
+}
+
+/* ---- data URI -> Blob, then compress ---- */
+function dataURItoBlob(uri){
+  const [meta, b64] = uri.split(",");
+  const mime = (meta.match(/data:(.*?);/) || [,"image/jpeg"])[1];
+  const bin = atob(b64), len = bin.length, arr = new Uint8Array(len);
+  for(let i=0;i<len;i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+function compress(blob, max=1400, q=0.8){
+  return new Promise((res)=>{
+    const img = new Image(); const u = URL.createObjectURL(blob);
+    img.onload = () => { URL.revokeObjectURL(u);
+      let w=img.width,h=img.height;
+      if(Math.max(w,h)>max){const r=max/Math.max(w,h);w=Math.round(w*r);h=Math.round(h*r);}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      c.toBlob(b=>res(b||blob),"image/jpeg",q);
+    };
+    img.onerror = () => res(blob);
+    img.src = u;
+  });
+}
+async function uploadDataURI(uri, folder="products"){
+  let blob = dataURItoBlob(uri);
+  if(blob.type.startsWith("image/")) blob = await compress(blob);
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+  const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType:"image/jpeg", upsert:false });
+  if(error) throw error;
+  return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/* ---- main import ---- */
+let running = false;
+async function runImport(){
+  if(running) return; running = true;
+  document.getElementById("runBtn").disabled = true;
+  doneEl.classList.remove("show"); logEl.innerHTML = "";
+  try{
+    log("Reading your website…");
+    const html = await (await fetch("/index.html", { cache:"no-store" })).text();
+
+    const imgLit = extractAssignment(html, "IMG", "{", "}");
+    const prodLit = extractAssignment(html, "products", "[", "]");
+    const featLit = extractAssignment(html, "featuredIds", "[", "]");
+    if(!imgLit || !prodLit){ throw new Error("Could not read product data from the site."); }
+
+    const IMG = new Function("return (" + imgLit + ")")();
+    const products = new Function("IMG", "return (" + prodLit + ")")(IMG);
+    const featuredIds = featLit ? new Function("return (" + featLit + ")")() : [];
+    log(`Found ${products.length} products on the website.`, "ok");
+
+    // which slugs already exist?
+    const { data: existing } = await sb.from("products").select("slug");
+    const have = new Set((existing||[]).map(r=>r.slug));
+
+    let done=0, imported=0, skipped=0, failed=0;
+    for(const p of products){
+      done++;
+      barFill.style.width = Math.round(done/products.length*100) + "%";
+      countEl.textContent = `Processing ${done} of ${products.length}…`;
+      if(have.has(p.id)){ log(`• ${p.name} — already imported, skipped`, "skip"); skipped++; continue; }
+      try{
+        // upload images
+        const urls = [];
+        for(const uri of (p.images||[])){
+          if(typeof uri === "string" && uri.startsWith("data:")){
+            urls.push(await uploadDataURI(uri));
+          }
+        }
+        const row = {
+          slug: p.id, name: p.name, name_ar: p.name_ar || p.name,
+          collection: p.col || "", cat: p.cat || "",
+          price: p.price || "", price_ar: p.price_ar || p.price || "",
+          weight: p.weight || "", weight_ar: p.weight_ar || p.weight || "",
+          description: p.desc || "", description_ar: p.desc_ar || p.desc || "",
+          metal: (p.specs && (p.specs.Metal || p.specs.metal)) || "",
+          specs: p.specs || {}, specs_ar: p.specs_ar || {},
+          new_arrival: !!p.isNew, featured: featuredIds.includes(p.id),
+          in_stock: true, display_order: done,
+          main_image: urls[0] || ""
+        };
+        const { data: inserted, error } = await sb.from("products").insert(row).select().single();
+        if(error) throw error;
+        if(urls.length){
+          await sb.from("product_images").insert(urls.map((u,i)=>({
+            product_id: inserted.id, url: u, alt: p.name, is_main: i===0, display_order: i
+          })));
+        }
+        log(`✓ ${p.name} — imported (${urls.length} photo${urls.length===1?"":"s"})`, "ok");
+        imported++;
+      }catch(ex){
+        log(`✗ ${p.name} — failed: ${ex.message}`, "err"); failed++;
+      }
+    }
+    barFill.style.width = "100%";
+    countEl.textContent = "Finished.";
+    doneEl.innerHTML = `<b>Done.</b> Imported ${imported}, skipped ${skipped} (already there), failed ${failed}.<br>
+      Open the <a href="/admin/dashboard.html">dashboard</a> to edit your products.`;
+    doneEl.classList.add("show");
+  }catch(ex){
+    log("ERROR: " + ex.message, "err");
+    countEl.textContent = "Stopped.";
+  }
+  document.getElementById("runBtn").disabled = false;
+  running = false;
+}
+document.getElementById("runBtn").onclick = runImport;
+document.getElementById("recheckBtn").onclick = async () => {
+  const { count } = await sb.from("products").select("*", { count:"exact", head:true });
+  countEl.textContent = `Your dashboard currently has ${count||0} products.`;
+};
+</script>
+</body>
+</html>

@@ -229,6 +229,10 @@ tr:last-child td{border-bottom:none}
         <div class="field"><label>Collection</label><select id="fCol"></select></div>
         <div class="field"><label>Price (EGP)</label><input id="fPrice" placeholder="e.g. 46,000" /></div>
       </div>
+      <div class="field-row">
+        <div class="field"><label>Weight</label><input id="fWeight" placeholder="e.g. 4.51 g" /></div>
+        <div class="field"><label>Metal</label><input id="fMetal" placeholder="e.g. 18k Yellow Gold" /></div>
+      </div>
       <div class="field"><label>Description (English)</label><textarea id="fDesc" rows="2" placeholder="Short description shown on the product"></textarea></div>
       <div class="field"><label>Description (Arabic)</label><textarea id="fDescAr" dir="rtl" rows="2"></textarea></div>
       <div class="toggle-line"><input type="checkbox" id="fFeatured" /><label for="fFeatured">Show in <b>Featured</b> section on homepage</label></div>
@@ -410,6 +414,7 @@ function openProductModal(p){
   $("productModalTitle").textContent = p?"Edit Product":"Add Product";
   $("fName").value=p?.name||""; $("fNameAr").value=p?.name_ar||"";
   $("fPrice").value=(p?.price||"").replace(/^EGP\s*/i,"");
+  $("fWeight").value=p?.weight||""; $("fMetal").value=p?.metal||"";
   $("fDesc").value=p?.description||""; $("fDescAr").value=p?.description_ar||"";
   $("fFeatured").checked=!!p?.featured; $("fNew").checked=!!p?.new_arrival;
   $("fStock").checked=p?p.in_stock!==false:true;
@@ -449,11 +454,13 @@ $("productForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const name=$("fName").value.trim(); if(!name) return toast("Please enter a name",true);
   const priceRaw=$("fPrice").value.trim().replace(/^EGP\s*/i,"");
+  const weight=$("fWeight").value.trim(), metal=$("fMetal").value.trim();
   const btn=$("saveProductBtn"); btn.disabled=true; btn.textContent="Saving…";
   const row={
     name, name_ar:$("fNameAr").value.trim(),
     collection:$("fCol").value, cat:colLabel($("fCol").value),
     price: priceRaw?`EGP ${priceRaw}`:"", price_ar: priceRaw?`${priceRaw} ج.م`:"",
+    weight, weight_ar: weight, metal, specs: metal?{Metal:metal}:{},
     description:$("fDesc").value.trim(), description_ar:$("fDescAr").value.trim(),
     featured:$("fFeatured").checked, new_arrival:$("fNew").checked, in_stock:$("fStock").checked,
     main_image: photos[0]?.url || ""
