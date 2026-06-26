@@ -1,9 +1,18 @@
 /* cms-bootstrap.js — loads live Supabase content onto the public site. */
 (async function () {
+  /* Mobile UX: keep the "Back to collections" button always visible while scrolling. */
+  try {
+    const st = document.createElement("style");
+    st.textContent =
+      "@media(max-width:760px){#collectionPage.active .back-link{" +
+      "position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:1500;margin:0;" +
+      "background:#14110c;color:#c8a24a;border:1px solid rgba(200,162,71,.6);padding:.7rem 1.4rem;" +
+      "border-radius:40px;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:.82rem;white-space:nowrap}}";
+    document.head.appendChild(st);
+  } catch (e) {}
+
   const cfg = window.ZIAD_SUPABASE || {};
-  if (!window.supabase || !cfg.SUPABASE_URL || cfg.SUPABASE_URL.includes("YOUR_PROJECT_REF")) {
-    return; // not configured -> keep built-in content
-  }
+  if (!window.supabase || !cfg.SUPABASE_URL || cfg.SUPABASE_URL.includes("YOUR_PROJECT_REF")) return;
   const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 
   try {
@@ -15,14 +24,10 @@
       sb.from("settings").select("key,value")
     ]);
 
-    /* 1. Text overrides */
     if (contentRes.data && typeof T === "object") {
-      contentRes.data.forEach((r) => {
-        if (r.key) T[r.key] = { en: r.en || "", ar: r.ar || r.en || "" };
-      });
+      contentRes.data.forEach((r) => { if (r.key) T[r.key] = { en: r.en || "", ar: r.ar || r.en || "" }; });
     }
 
-    /* 2. Collections — keep built-in cover when CMS has none, else a product photo */
     if (colRes.data && colRes.data.length && typeof collections !== "undefined") {
       const origImg = {};
       collections.forEach((c) => { origImg[c.key] = c.img; });
@@ -37,11 +42,9 @@
       }));
     }
 
-    /* 3. Products */
     if (prodRes.data && prodRes.data.length && typeof products !== "undefined") {
       products = prodRes.data.map((p) => {
-        const gallery = (p.product_images || [])
-          .slice()
+        const gallery = (p.product_images || []).slice()
           .sort((a, b) => (b.is_main - a.is_main) || (a.display_order - b.display_order))
           .map((i) => i.url);
         let images = (p.main_image ? [p.main_image] : []).concat(gallery)
@@ -54,8 +57,7 @@
           weight: p.weight || "", weight_ar: p.weight_ar || p.weight || "",
           isNew: !!p.new_arrival, images,
           desc: p.description || "", desc_ar: p.description_ar || p.description || "",
-          specs: p.specs || {}, specs_ar: p.specs_ar || {},
-          _wa: p.whatsapp_message || ""
+          specs: p.specs || {}, specs_ar: p.specs_ar || {}, _wa: p.whatsapp_message || ""
         };
       });
       if (typeof featuredIds !== "undefined") {
@@ -64,7 +66,6 @@
       }
     }
 
-    /* 4. Settings: WhatsApp numbers + contact texts */
     const settings = {};
     (setRes.data || []).forEach((r) => (settings[r.key] = r.value));
     const contact = settings.contact || {};
@@ -80,7 +81,6 @@
       if (contact.hours) T["val_hours"] = { en: contact.hours, ar: contact.hours };
     }
 
-    /* Re-render using the site's own pipeline */
     if (typeof setLang === "function") setLang(typeof LANG !== "undefined" ? LANG : "en");
     if (typeof bindGeneralWa === "function") bindGeneralWa();
     if (typeof handleHash === "function") handleHash();
