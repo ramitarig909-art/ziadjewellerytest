@@ -1,21 +1,8 @@
-/* =====================================================================
- *  cms-bootstrap.js  (classic script, loaded at the end of the page)
- *  ---------------------------------------------------------------------
- *  Loads live content from Supabase and overlays it onto the existing
- *  website WITHOUT changing any markup or design:
- *    1. text   -> merged into the site's `T` translation map (data-k)
- *    2. collections / products -> replace the global arrays
- *    3. contact/WhatsApp -> updated links
- *  Then the site's own render functions are re-run.
- *
- *  The original hardcoded content stays in place as an instant-paint
- *  fallback, so the site never looks empty and still works offline /
- *  before Supabase is configured.
- * ===================================================================== */
+/* cms-bootstrap.js — loads live Supabase content onto the public site. */
 (async function () {
   const cfg = window.ZIAD_SUPABASE || {};
   if (!window.supabase || !cfg.SUPABASE_URL || cfg.SUPABASE_URL.includes("YOUR_PROJECT_REF")) {
-    return; // not configured yet -> keep built-in content
+    return; // not configured -> keep built-in content
   }
   const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 
@@ -28,22 +15,29 @@
       sb.from("settings").select("key,value")
     ]);
 
-    /* ---- 1. Text overrides (uses the site's own data-k system) ---- */
+    /* 1. Text overrides */
     if (contentRes.data && typeof T === "object") {
       contentRes.data.forEach((r) => {
         if (r.key) T[r.key] = { en: r.en || "", ar: r.ar || r.en || "" };
       });
     }
 
-    /* ---- 2. Collections ---- */
+    /* 2. Collections — keep built-in cover when CMS has none, else a product photo */
     if (colRes.data && colRes.data.length && typeof collections !== "undefined") {
+      const origImg = {};
+      collections.forEach((c) => { origImg[c.key] = c.img; });
+      const firstProductImg = (key) => {
+        const p = (prodRes.data || []).find((x) => x.collection === key && x.main_image);
+        return p ? p.main_image : "";
+      };
       collections = colRes.data.map((c) => ({
         key: c.key, title: c.title, title_ar: c.title_ar || c.title,
-        tag: c.tag, tag_ar: c.tag_ar || c.tag, img: c.img || ""
+        tag: c.tag, tag_ar: c.tag_ar || c.tag,
+        img: c.img || origImg[c.key] || firstProductImg(c.key) || ""
       }));
     }
 
-    /* ---- 3. Products (mapped to the shape the site expects) ---- */
+    /* 3. Products */
     if (prodRes.data && prodRes.data.length && typeof products !== "undefined") {
       products = prodRes.data.map((p) => {
         const gallery = (p.product_images || [])
@@ -64,14 +58,13 @@
           _wa: p.whatsapp_message || ""
         };
       });
-      // Featured list is derived from the "featured" flag.
       if (typeof featuredIds !== "undefined") {
         const f = prodRes.data.filter((p) => p.featured).map((p) => p.slug);
         if (f.length) featuredIds = f;
       }
     }
 
-    /* ---- 4. Settings: WhatsApp numbers + a couple of contact texts ---- */
+    /* 4. Settings: WhatsApp numbers + contact texts */
     const settings = {};
     (setRes.data || []).forEach((r) => (settings[r.key] = r.value));
     const contact = settings.contact || {};
@@ -87,7 +80,7 @@
       if (contact.hours) T["val_hours"] = { en: contact.hours, ar: contact.hours };
     }
 
-    /* ---- Re-render using the site's own pipeline ---- */
+    /* Re-render using the site's own pipeline */
     if (typeof setLang === "function") setLang(typeof LANG !== "undefined" ? LANG : "en");
     if (typeof bindGeneralWa === "function") bindGeneralWa();
     if (typeof handleHash === "function") handleHash();
