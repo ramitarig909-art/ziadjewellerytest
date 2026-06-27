@@ -67,7 +67,13 @@ table{width:100%;border-collapse:collapse;font-size:.92rem}
 th{text-align:start;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.7rem .7rem;border-bottom:1px solid rgba(184,146,61,.3);white-space:nowrap}
 td{padding:.8rem .7rem;border-bottom:1px solid var(--line-soft);vertical-align:middle}
 tr:last-child td{border-bottom:none}
-.row-thumb{width:64px;height:64px;border-radius:6px;object-fit:cover;background:var(--sand);border:1px solid var(--line-soft);display:block}
+.row-thumb{width:84px;height:84px;border-radius:6px;object-fit:cover;background:var(--sand);border:1px solid var(--line-soft);display:block}
+img.row-thumb{cursor:zoom-in;transition:transform .15s}
+img.row-thumb:hover{transform:scale(1.04)}
+.lightbox{position:fixed;inset:0;background:rgba(20,17,12,.88);display:none;align-items:center;justify-content:center;z-index:200;padding:1.4rem;cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.lightbox .x{position:fixed;top:16px;inset-inline-end:20px;color:#fff;font-size:2rem;line-height:1;opacity:.85}
 .tag{display:inline-block;font-size:.72rem;padding:.28rem .6rem;border-radius:3px;background:var(--pearl);color:var(--gold-deep)}
 .tag.new{background:#f4ece0;color:var(--gold-deep)}
 .tag.live{background:#eef2ea;color:var(--ok)}
@@ -126,7 +132,7 @@ tr:last-child td{border-bottom:none}
   .page-head .btn{width:100%}
   .stat-row{grid-template-columns:repeat(2,1fr);gap:.7rem}
   .field-row,.bi-grid{grid-template-columns:1fr}
-  .row-thumb{width:72px;height:72px}
+  .row-thumb{width:92px;height:92px}
   .modal{padding:1.3rem;border-radius:8px}
   .toast{inset-inline:.8rem;max-width:none}
 }
@@ -291,6 +297,7 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<div class="lightbox" id="lightbox"><span class="x">✕</span><img id="lightboxImg" src="" alt=""></div>
 <div class="toast" id="toast"></div>
 
 <script src="/assets/js/lib/config.js"></script>
@@ -395,6 +402,9 @@ $("langBtn").onclick = () => {
 /* ---------- auth ---------- */
 $("signOutBtn").onclick = async () => { await sb.auth.signOut(); window.location.replace("/admin/login.html"); };
 
+/* ---------- photo lightbox (click a product photo to view large) ---------- */
+$("lightbox").onclick = () => $("lightbox").classList.remove("open");
+
 /* ---------- navigation ---------- */
 document.querySelectorAll(".side nav button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -480,6 +490,10 @@ function renderProducts(filter=""){
 }
 $("productSearch").addEventListener("input", e=>renderProducts(e.target.value));
 $("productsBody").addEventListener("click", async e=>{
+  // tap a photo to view it large
+  if(e.target.tagName==="IMG" && e.target.classList.contains("row-thumb")){
+    $("lightboxImg").src=e.target.src; $("lightbox").classList.add("open"); return;
+  }
   const row=e.target.closest("tr"); if(!row) return;
   const p=PRODUCTS.find(x=>x.id===row.dataset.id); if(!p) return;
   if(e.target.classList.contains("edit-btn")) openProductModal(p);
