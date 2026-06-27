@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>ZIAD — Owner Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ivory:#FAF6EF;--pearl:#F2EBDD;--sand:#EFE7D7;
+  --espresso:#241F1A;--ink:#2E2922;--gold:#B8923D;--gold-bright:#D8B25A;--gold-deep:#977629;
+  --muted:#7d7568;--line-soft:rgba(36,31,26,.10);--ok:#5b7a4f;--warn:#a8442e;
+  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Jost',-apple-system,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ivory);color:var(--espresso);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
+html[dir="rtl"] body{font-family:'Cairo',var(--sans)}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.15}
+html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3{font-family:'Cairo',var(--serif);font-weight:700}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:1rem}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{background:var(--espresso);color:var(--pearl);padding:1.6rem 1.2rem;display:flex;flex-direction:column;gap:.3rem;position:sticky;top:0;height:100vh}
+.side .brand{font-family:var(--serif);font-size:1.5rem;color:var(--gold-bright)}
+.side .brand-sub{font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.langbtn{align-self:flex-start;border:1px solid rgba(216,178,90,.5);color:var(--gold-bright);font-size:.74rem;
+  padding:.3rem .8rem;border-radius:20px;margin-bottom:1.4rem;letter-spacing:.04em}
+.langbtn:hover{background:rgba(216,178,90,.15)}
+.side nav{display:flex;flex-direction:column;gap:.25rem}
+.side nav button{text-align:start;padding:.8rem .9rem;border-radius:6px;font-size:.92rem;color:var(--pearl);
+  display:flex;align-items:center;gap:.7rem;transition:.2s}
+.side nav button:hover{background:rgba(255,255,255,.06)}
+.side nav button.active{background:rgba(184,146,61,.2);color:var(--gold-bright)}
+.side nav button svg{width:18px;height:18px;flex:none;opacity:.85}
+.side .who{font-size:.72rem;color:var(--muted);margin-top:auto;padding:.4rem .9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side .foot-link{font-size:.82rem;padding:.5rem .9rem;text-align:start;color:var(--gold-bright)}
+.side .foot-link.muted{color:var(--muted)}
+.side .foot-link:hover{color:var(--pearl)}
+
+.main{padding:2.2rem 2.4rem 5rem;max-width:1080px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.page-head h1{font-size:2rem}
+.page-head p{color:var(--muted);font-size:.95rem;margin-top:.25rem;max-width:46ch}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-size:.82rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:.85rem 1.5rem;border-radius:3px;transition:.25s var(--ease);min-height:46px}
+.btn-gold{background:linear-gradient(120deg,var(--gold-deep),var(--gold),var(--gold-bright));color:#241402;font-weight:600}
+.btn-gold:hover{filter:brightness(1.05)}
+.btn-gold:disabled{opacity:.55}
+.btn-ghost{border:1px solid var(--line-soft);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-deep)}
+
+.card{background:#fff;border:1px solid var(--line-soft);border-radius:6px;padding:1.4rem}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.8rem}
+.stat{background:#fff;border:1px solid var(--line-soft);border-radius:6px;padding:1.1rem 1.2rem}
+.stat .n{font-family:var(--serif);font-size:2rem;color:var(--gold-deep)}
+html[dir="rtl"] .stat .n{font-family:'Cairo'}
+.stat .l{font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:start;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.7rem .7rem;border-bottom:1px solid rgba(184,146,61,.3);white-space:nowrap}
+td{padding:.8rem .7rem;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.row-thumb{width:84px;height:84px;border-radius:6px;object-fit:cover;background:var(--sand);border:1px solid var(--line-soft);display:block}
+img.row-thumb{cursor:zoom-in;transition:transform .15s}
+img.row-thumb:hover{transform:scale(1.04)}
+.lightbox{position:fixed;inset:0;background:rgba(20,17,12,.88);display:none;align-items:center;justify-content:center;z-index:200;padding:1.4rem;cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.lightbox .x{position:fixed;top:16px;inset-inline-end:20px;color:#fff;font-size:2rem;line-height:1;opacity:.85}
+.tag{display:inline-block;font-size:.72rem;padding:.28rem .6rem;border-radius:3px;background:var(--pearl);color:var(--gold-deep)}
+.tag.new{background:#f4ece0;color:var(--gold-deep)}
+.tag.live{background:#eef2ea;color:var(--ok)}
+.row-actions{display:flex;gap:1rem;font-size:.86rem}
+.row-actions button{color:var(--muted);min-height:40px}
+.row-actions button:hover{color:var(--gold-deep)}
+.row-actions button.danger:hover{color:var(--warn)}
+.table-toolbar{margin-bottom:1rem}
+.search{width:100%;max-width:340px;border:1px solid var(--line-soft);border-radius:4px;padding:.75rem .9rem;background:#fff}
+
+.overlay{position:fixed;inset:0;background:rgba(36,31,26,.5);display:none;align-items:flex-start;justify-content:center;padding:1.2rem;z-index:50;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:8px;max-width:580px;width:100%;margin:auto;padding:1.8rem}
+.modal h2{font-size:1.5rem;margin-bottom:.2rem}
+.modal .sub{color:var(--muted);font-size:.9rem;margin-bottom:1.4rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:.8rem;letter-spacing:.03em;color:var(--ink);margin-bottom:.4rem;font-weight:500}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line-soft);border-radius:4px;padding:.8rem .85rem;background:var(--ivory);color:var(--ink)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.bi-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.bi-grid small{color:var(--muted);font-size:.74rem}
+.upload-box{border:1.5px dashed rgba(184,146,61,.5);border-radius:6px;padding:1.5rem;text-align:center;color:var(--muted);font-size:.88rem;cursor:pointer;transition:.2s}
+.upload-box:hover,.upload-box.drag{border-color:var(--gold);color:var(--gold-deep);background:var(--pearl)}
+.upload-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.7rem;margin-top:.8rem}
+.upload-preview .ph{position:relative;aspect-ratio:1}
+.upload-preview img{width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid var(--line-soft);display:block}
+.upload-preview .ph .x{position:absolute;top:-7px;inset-inline-end:-7px;width:22px;height:22px;border-radius:50%;background:var(--espresso);color:#fff;font-size:.75rem;display:flex;align-items:center;justify-content:center}
+.upload-preview .ph .main{position:absolute;bottom:0;inset-inline:0;background:var(--gold);color:#241402;font-size:.6rem;text-align:center;letter-spacing:.05em;padding:1px}
+.modal-foot{display:flex;justify-content:flex-end;gap:.8rem;margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--line-soft)}
+.toggle-line{display:flex;align-items:center;gap:.6rem;font-size:.95rem;margin-bottom:1rem}
+.toggle-line input{width:22px;height:22px;flex:none;accent-color:var(--gold-deep)}
+.toggle-line label{margin:0;font-weight:400;color:var(--ink)}
+
+.settings-grid{display:grid;gap:1.1rem;max-width:620px}
+.toast{position:fixed;bottom:1.4rem;inset-inline-end:1.4rem;background:var(--espresso);color:var(--pearl);padding:.9rem 1.3rem;border-radius:4px;font-size:.9rem;display:flex;align-items:center;gap:.6rem;opacity:0;transform:translateY(8px);transition:.3s var(--ease);z-index:100;border-inline-start:3px solid var(--gold-bright);max-width:330px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.err{border-inline-start-color:var(--warn)}
+.empty{text-align:center;padding:2.6rem 1rem;color:var(--muted)}
+.loading{color:var(--muted);padding:1.2rem .7rem}
+
+/* mobile */
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:sticky;top:0;height:auto;flex-direction:column;gap:.2rem;padding:.8rem 1rem;z-index:30}
+  .side .brand,.side .brand-sub,.side .who{display:none}
+  .side .topline{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .langbtn{margin:0}
+  .side nav{flex-direction:row;overflow-x:auto;gap:.3rem;padding-bottom:.3rem;-webkit-overflow-scrolling:touch;width:100%}
+  .side nav button{padding:.6rem .8rem;white-space:nowrap;font-size:.86rem;border-radius:20px;background:rgba(255,255,255,.05)}
+  .side nav button svg{display:none}
+  .side .foot-row{display:flex;gap:.4rem;width:100%}
+  .side .foot-link{padding:.45rem .7rem;font-size:.8rem}
+  .main{padding:1.3rem 1rem 4rem}
+  .page-head h1{font-size:1.6rem}
+  .page-head .btn{width:100%}
+  .stat-row{grid-template-columns:repeat(2,1fr);gap:.7rem}
+  .field-row,.bi-grid{grid-template-columns:1fr}
+  .row-thumb{width:92px;height:92px}
+  .modal{padding:1.3rem;border-radius:8px}
+  .toast{inset-inline:.8rem;max-width:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="side">
+    <div class="topline">
+      <div>
+        <div class="brand">ZIAD</div>
+        <div class="brand-sub" data-i18n="owner_dashboard">Owner Dashboard</div>
+      </div>
+    </div>
+    <button class="langbtn" id="langBtn">العربية</button>
+    <nav>
+      <button data-page="dashboard" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span data-i18n="nav_overview">Overview</span>
+      </button>
+      <button data-page="products">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h12l3 5-9 13L3 8z"/></svg>
+        <span data-i18n="nav_products">Products</span>
+      </button>
+      <button data-page="collections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+        <span data-i18n="nav_collections">Collections</span>
+      </button>
+      <button data-page="homepage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        <span data-i18n="nav_homepage">Homepage Text</span>
+      </button>
+      <button data-page="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a8 8 0 000-2l2.1-1.6-2-3.5-2.5 1a8 8 0 00-1.7-1L15 3H9l-.3 2.9a8 8 0 00-1.7 1l-2.5-1-2 3.5L4.6 11a8 8 0 000 2l-2.1 1.6 2 3.5 2.5-1a8 8 0 001.7 1L9 21h6l.3-2.9a8 8 0 001.7-1l2.5 1 2-3.5z"/></svg>
+        <span data-i18n="nav_settings">Contact &amp; Settings</span>
+      </button>
+    </nav>
+    <div class="who" id="whoami">…</div>
+    <div class="foot-row">
+      <a class="foot-link" href="/index.html" target="_blank" data-i18n="view_site">↗ View website</a>
+      <button class="foot-link muted" id="signOutBtn" data-i18n="sign_out">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- Overview -->
+    <section id="page-dashboard" class="page">
+      <div class="page-head"><div><h1 data-i18n="ov_title">Overview</h1><p data-i18n="ov_sub">A quick look at what's live on your website</p></div></div>
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="statProducts">–</div><div class="l" data-i18n="st_products">Products</div></div>
+        <div class="stat"><div class="n" id="statFeatured">–</div><div class="l" data-i18n="st_featured">Featured</div></div>
+        <div class="stat"><div class="n" id="statNew">–</div><div class="l" data-i18n="st_new">New Arrivals</div></div>
+        <div class="stat"><div class="n" id="statCollections">–</div><div class="l" data-i18n="st_collections">Collections</div></div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1.2rem;margin-bottom:.8rem" data-i18n="recent">Recently updated</h3>
+        <div class="table-scroll"><table><thead><tr>
+          <th data-i18n="th_product">Product</th><th data-i18n="th_collection">Collection</th><th data-i18n="th_price">Price</th>
+        </tr></thead><tbody id="recentBody"><tr><td colspan="3" class="loading">…</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section id="page-products" class="page" hidden>
+      <div class="page-head">
+        <div><h1 data-i18n="pr_title">Products</h1><p data-i18n="pr_sub">Add, edit or remove pieces shown on your website</p></div>
+        <button class="btn btn-gold" id="addProductBtn" data-i18n="add_product">+ Add Product</button>
+      </div>
+      <div class="table-toolbar"><input class="search" id="productSearch" data-i18n-ph="search_ph" placeholder="Search products…" /></div>
+      <div class="card" style="padding:0">
+        <div class="table-scroll"><table><thead><tr>
+          <th></th><th data-i18n="th_name">Name</th><th data-i18n="th_collection">Collection</th>
+          <th data-i18n="th_price">Price</th><th data-i18n="th_status">Status</th><th></th>
+        </tr></thead><tbody id="productsBody"><tr><td colspan="6" class="loading">…</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- Collections -->
+    <section id="page-collections" class="page" hidden>
+      <div class="page-head"><div><h1 data-i18n="col_title">Collections</h1><p data-i18n="col_sub">The categories visitors browse on the homepage</p></div></div>
+      <div class="card" style="padding:0">
+        <div class="table-scroll"><table><thead><tr>
+          <th data-i18n="th_collection">Collection</th><th data-i18n="th_tagline">Tagline</th>
+          <th data-i18n="th_products_count">Products</th><th></th>
+        </tr></thead><tbody id="collectionsBody"><tr><td colspan="4" class="loading">…</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- Homepage Text -->
+    <section id="page-homepage" class="page" hidden>
+      <div class="page-head">
+        <div><h1 data-i18n="home_title">Homepage Text</h1><p data-i18n="home_sub">The main wording on your homepage. Type in both languages.</p></div>
+        <button class="btn btn-gold" id="saveHomeBtn" data-i18n="save_changes">Save Changes</button>
+      </div>
+      <div class="card"><div class="settings-grid" id="homeFields"><div class="loading">…</div></div></div>
+    </section>
+
+    <!-- Settings -->
+    <section id="page-settings" class="page" hidden>
+      <div class="page-head">
+        <div><h1 data-i18n="set_title">Contact &amp; Settings</h1><p data-i18n="set_sub">Used across the site and in your WhatsApp buttons</p></div>
+        <button class="btn btn-gold" id="saveSettingsBtn" data-i18n="save_changes">Save Changes</button>
+      </div>
+      <div class="card"><div class="settings-grid" id="settingsFields"><div class="loading">…</div></div></div>
+    </section>
+  </main>
+</div>
+
+<!-- Product modal -->
+<div class="overlay" id="productOverlay">
+  <div class="modal">
+    <h2 id="productModalTitle">Add Product</h2>
+    <div class="sub" data-i18n="product_modal_sub">This appears on your website as soon as you save.</div>
+    <form id="productForm">
+      <div class="field">
+        <label data-i18n="photos_label">Photos — first photo is the main one</label>
+        <div class="upload-box" id="uploadBox" data-i18n="upload_hint">Click to choose photos, or drag them here</div>
+        <input type="file" id="fileInput" accept="image/*" multiple hidden />
+        <div class="upload-preview" id="uploadPreview"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="name_en">Name (English)</label><input id="fName" required /></div>
+        <div class="field"><label data-i18n="name_ar">Name (Arabic)</label><input id="fNameAr" dir="rtl" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="collection">Collection</label><select id="fCol"></select></div>
+        <div class="field"><label data-i18n="price">Price (EGP)</label><input id="fPrice" placeholder="46,000" /></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="weight">Weight</label><input id="fWeight" placeholder="4.51 g" /></div>
+        <div class="field"><label data-i18n="metal">Metal</label><input id="fMetal" placeholder="18k Yellow Gold" /></div>
+      </div>
+      <div class="toggle-line"><input type="checkbox" id="fFeatured" /><label for="fFeatured" data-i18n="featured_toggle">Show in Featured section on homepage</label></div>
+      <div class="toggle-line"><input type="checkbox" id="fNew" /><label for="fNew" data-i18n="new_toggle">Show "New" tag</label></div>
+      <div class="toggle-line"><input type="checkbox" id="fStock" checked /><label for="fStock" data-i18n="stock_toggle">In stock (visible on site)</label></div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="cancelProductBtn" data-i18n="cancel">Cancel</button>
+        <button type="submit" class="btn btn-gold" id="saveProductBtn" data-i18n="save_product">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Collection modal -->
+<div class="overlay" id="colOverlay">
+  <div class="modal">
+    <h2 data-i18n="edit_collection">Edit Collection</h2>
+    <div class="sub" data-i18n="col_modal_sub">Edit the title and tagline shown on the homepage.</div>
+    <form id="colForm">
+      <div class="field-row">
+        <div class="field"><label data-i18n="title_en">Title (English)</label><input id="cTitle" required /></div>
+        <div class="field"><label data-i18n="title_ar">Title (Arabic)</label><input id="cTitleAr" dir="rtl" /></div>
+      </div>
+      <div class="field"><label data-i18n="tagline_en">Tagline (English)</label><textarea id="cTag" rows="2"></textarea></div>
+      <div class="field"><label data-i18n="tagline_ar">Tagline (Arabic)</label><textarea id="cTagAr" dir="rtl" rows="2"></textarea></div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="cancelColBtn" data-i18n="cancel">Cancel</button>
+        <button type="submit" class="btn btn-gold" data-i18n="save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox"><span class="x">✕</span><img id="lightboxImg" src="" alt=""></div>
+<div class="toast" id="toast"></div>
+
+<script src="/assets/js/lib/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===================== ZIAD Owner Dashboard ===================== */
+const cfg = window.ZIAD_SUPABASE || {};
+const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+const BUCKET = "product-images";
+let PRODUCTS = [], COLLECTIONS = [], CONTENT = {}, CONTACT = {};
+let LANG = localStorage.getItem("ziad_admin_lang") || "en";
+
+/* ---------- translations ---------- */
+const I18N = {
+  en:{
+    owner_dashboard:"Owner Dashboard",nav_overview:"Overview",nav_products:"Products",nav_collections:"Collections",
+    nav_homepage:"Homepage Text",nav_settings:"Contact & Settings",view_site:"↗ View website",sign_out:"Sign out",lang_btn:"العربية",
+    ov_title:"Overview",ov_sub:"A quick look at what's live on your website",
+    st_products:"Products",st_featured:"Featured",st_new:"New Arrivals",st_collections:"Collections",
+    recent:"Recently updated",th_product:"Product",th_collection:"Collection",th_price:"Price",
+    pr_title:"Products",pr_sub:"Add, edit or remove pieces shown on your website",add_product:"+ Add Product",search_ph:"Search products…",
+    th_name:"Name",th_status:"Status",edit:"Edit",delete:"Delete",tag_new:"New",tag_featured:"Featured",tag_live:"Live",
+    empty_products:'No products yet. Click “+ Add Product”.',no_match:"No products match your search.",
+    add_product_title:"Add Product",edit_product_title:"Edit Product",product_modal_sub:"This appears on your website as soon as you save.",
+    photos_label:"Photos — first photo is the main one",upload_hint:"Click to choose photos, or drag them here",uploading:"Uploading…",
+    name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",
+    featured_toggle:"Show in Featured section on homepage",new_toggle:'Show "New" tag',stock_toggle:"In stock (visible on site)",
+    cancel:"Cancel",save_product:"Save Product",saving:"Saving…",confirm_delete:'Remove "{name}" from the website? This cannot be undone.',
+    col_title:"Collections",col_sub:"The categories visitors browse on the homepage",th_tagline:"Tagline",th_products_count:"Products",
+    edit_collection:"Edit Collection",col_modal_sub:"Edit the title and tagline shown on the homepage.",
+    title_en:"Title (English)",title_ar:"Title (Arabic)",tagline_en:"Tagline (English)",tagline_ar:"Tagline (Arabic)",save:"Save",
+    home_title:"Homepage Text",home_sub:"The main wording on your homepage. Fill in both languages.",
+    home_big_title:"Big title at the top (each new line shows on a new line)",home_subtitle:"Short paragraph under the title",
+    home_button:"Button text",home_footer:"Small line at the very bottom",english:"English",arabic:"العربية",save_changes:"Save Changes",
+    set_title:"Contact & Settings",set_sub:"Used across the site and in your WhatsApp buttons",
+    s_whatsapp_1:"WhatsApp number 1 (digits only, e.g. 201091198726)",s_whatsapp_2:"WhatsApp number 2 (optional)",
+    s_phone:"Phone",s_email:"Email",s_address:"Showroom address",s_hours:"Opening hours",
+    s_maps:"Google Maps link",s_instagram:"Instagram link",s_facebook:"Facebook link",s_tiktok:"TikTok link",
+    t_removed:"Removed",t_uploaded:"Photo uploaded",t_added:"Added — live on the site",t_updated:"Updated — live on the site",
+    t_col_saved:"Collection saved",t_home_saved:"Homepage text saved",t_settings_saved:"Settings saved",
+    need_name:"Please enter a name",wait_upload:"Please wait for the photo to finish uploading",main_tag:"MAIN"
+  },
+  ar:{
+    owner_dashboard:"لوحة التحكم",nav_overview:"نظرة عامة",nav_products:"المنتجات",nav_collections:"المجموعات",
+    nav_homepage:"نصوص الصفحة الرئيسية",nav_settings:"التواصل والإعدادات",view_site:"↗ عرض الموقع",sign_out:"تسجيل الخروج",lang_btn:"English",
+    ov_title:"نظرة عامة",ov_sub:"نظرة سريعة على ما هو منشور على موقعك",
+    st_products:"المنتجات",st_featured:"المميّزة",st_new:"وصل حديثاً",st_collections:"المجموعات",
+    recent:"آخر التحديثات",th_product:"المنتج",th_collection:"المجموعة",th_price:"السعر",
+    pr_title:"المنتجات",pr_sub:"أضف أو عدّل أو احذف القطع المعروضة على موقعك",add_product:"+ إضافة منتج",search_ph:"ابحث عن منتج…",
+    th_name:"الاسم",th_status:"الحالة",edit:"تعديل",delete:"حذف",tag_new:"جديد",tag_featured:"مميّز",tag_live:"منشور",
+    empty_products:'لا توجد منتجات بعد. اضغط "إضافة منتج".',no_match:"لا توجد منتجات مطابقة لبحثك.",
+    add_product_title:"إضافة منتج",edit_product_title:"تعديل المنتج",product_modal_sub:"يظهر على موقعك فور الحفظ.",
+    photos_label:"الصور — الصورة الأولى هي الرئيسية",upload_hint:"اضغط لاختيار الصور، أو اسحبها هنا",uploading:"جاري الرفع…",
+    name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",
+    featured_toggle:"عرضه في قسم المميّزة بالصفحة الرئيسية",new_toggle:'إظهار علامة "جديد"',stock_toggle:"متوفّر (ظاهر على الموقع)",
+    cancel:"إلغاء",save_product:"حفظ المنتج",saving:"جاري الحفظ…",confirm_delete:'حذف "{name}" من الموقع؟ لا يمكن التراجع عن هذا.',
+    col_title:"المجموعات",col_sub:"الفئات التي يتصفّحها الزوار في الصفحة الرئيسية",th_tagline:"الوصف المختصر",th_products_count:"عدد المنتجات",
+    edit_collection:"تعديل المجموعة",col_modal_sub:"عدّل العنوان والوصف الظاهر في الصفحة الرئيسية.",
+    title_en:"العنوان (إنجليزي)",title_ar:"العنوان (عربي)",tagline_en:"الوصف (إنجليزي)",tagline_ar:"الوصف (عربي)",save:"حفظ",
+    home_title:"نصوص الصفحة الرئيسية",home_sub:"النصوص الرئيسية في صفحتك. املأ الحقول باللغتين.",
+    home_big_title:"العنوان الكبير في الأعلى (كل سطر جديد يظهر في سطر منفصل)",home_subtitle:"فقرة قصيرة تحت العنوان",
+    home_button:"نص الزر",home_footer:"سطر صغير في أسفل الموقع",english:"English",arabic:"العربية",save_changes:"حفظ التغييرات",
+    set_title:"التواصل والإعدادات",set_sub:"تُستخدم في الموقع وأزرار واتساب",
+    s_whatsapp_1:"رقم واتساب 1 (أرقام فقط، مثال 201091198726)",s_whatsapp_2:"رقم واتساب 2 (اختياري)",
+    s_phone:"الهاتف",s_email:"البريد الإلكتروني",s_address:"عنوان المعرض",s_hours:"مواعيد العمل",
+    s_maps:"رابط خرائط جوجل",s_instagram:"رابط انستجرام",s_facebook:"رابط فيسبوك",s_tiktok:"رابط تيك توك",
+    t_removed:"تم الحذف",t_uploaded:"تم رفع الصورة",t_added:"تمت الإضافة — منشور على الموقع",t_updated:"تم التحديث — منشور على الموقع",
+    t_col_saved:"تم حفظ المجموعة",t_home_saved:"تم حفظ النصوص",t_settings_saved:"تم حفظ الإعدادات",
+    need_name:"الرجاء إدخال الاسم",wait_upload:"الرجاء انتظار اكتمال رفع الصورة",main_tag:"رئيسية"
+  }
+};
+function t(key, vars){
+  let s = (I18N[LANG] && I18N[LANG][key]) || (I18N.en[key]) || key;
+  if(vars) Object.keys(vars).forEach(k=>{ s = s.replace("{"+k+"}", vars[k]); });
+  return s;
+}
+
+/* ---------- helpers ---------- */
+const $ = (id) => document.getElementById(id);
+const esc = (s="") => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(msg, isErr=false){
+  const el=$("toast"); el.textContent=msg; el.className="toast show"+(isErr?" err":"");
+  clearTimeout(window._tt); window._tt=setTimeout(()=>el.classList.remove("show"),2800);
+}
+function slugify(s=""){return s.toLowerCase().trim().replace(/[^\w\s-]/g,"").replace(/[\s_-]+/g,"-").replace(/^-+|-+$/g,"")||"item";}
+const colLabel = (key) => (COLLECTIONS.find(c=>c.key===key)||{}).title || key || "—";
+
+/* ---------- language ---------- */
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG==="ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+  $("langBtn").textContent = t("lang_btn");
+}
+$("langBtn").onclick = () => {
+  LANG = LANG==="ar" ? "en" : "ar";
+  localStorage.setItem("ziad_admin_lang", LANG);
+  applyI18n(); renderAll();
+};
+
+/* ---------- auth ---------- */
+$("signOutBtn").onclick = async () => { await sb.auth.signOut(); window.location.replace("/admin/login.html"); };
+
+/* ---------- photo lightbox (click a product photo to view large) ---------- */
+$("lightbox").onclick = () => $("lightbox").classList.remove("open");
+
+/* ---------- navigation ---------- */
+document.querySelectorAll(".side nav button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".side nav button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".page").forEach(p=>p.hidden=true);
+    $("page-"+btn.dataset.page).hidden=false;
+    window.scrollTo(0,0);
+  });
+});
+
+/* ---------- images ---------- */
+function compress(file, max=1600, q=0.82){
+  return new Promise((res,rej)=>{
+    const img=new Image(); const u=URL.createObjectURL(file);
+    img.onload=()=>{ URL.revokeObjectURL(u);
+      let w=img.width,h=img.height;
+      if(Math.max(w,h)>max){const r=max/Math.max(w,h);w=Math.round(w*r);h=Math.round(h*r);}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      c.toBlob(b=>b?res(b):rej(new Error("compress failed")),"image/jpeg",q);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("invalid image"));};
+    img.src=u;
+  });
+}
+async function uploadPhoto(file){
+  const blob=await compress(file);
+  const path=`products/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+  const { error }=await sb.storage.from(BUCKET).upload(path,blob,{contentType:"image/jpeg",upsert:false});
+  if(error) throw error;
+  return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/* ---------- load ---------- */
+async function loadAll(){
+  const [p,c,content,contact] = await Promise.all([
+    sb.from("products").select("*, product_images(*)").order("display_order",{ascending:true}).order("created_at",{ascending:false}),
+    sb.from("collections").select("*").order("display_order",{ascending:true}),
+    sb.from("content").select("*"),
+    sb.from("settings").select("value").eq("key","contact").maybeSingle()
+  ]);
+  if(p.error) throw p.error;
+  PRODUCTS=p.data||[]; COLLECTIONS=c.data||[];
+  CONTENT={}; (content.data||[]).forEach(r=>CONTENT[r.key]=r);
+  CONTACT=contact.data?.value||{};
+  renderAll();
+}
+function renderAll(){ fillColSelect(); renderOverview(); renderProducts($("productSearch").value); renderCollections(); renderHomepage(); renderSettings(); }
+
+/* ---------- overview ---------- */
+function renderOverview(){
+  $("statProducts").textContent=PRODUCTS.length;
+  $("statFeatured").textContent=PRODUCTS.filter(p=>p.featured).length;
+  $("statNew").textContent=PRODUCTS.filter(p=>p.new_arrival).length;
+  $("statCollections").textContent=COLLECTIONS.length;
+  const recent=[...PRODUCTS].sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at)).slice(0,5);
+  $("recentBody").innerHTML = recent.length
+    ? recent.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(colLabel(p.collection))}</td><td>${esc(p.price||"—")}</td></tr>`).join("")
+    : `<tr><td colspan="3" class="empty">${t("empty_products")}</td></tr>`;
+}
+
+/* ---------- products ---------- */
+function renderProducts(filter=""){
+  const body=$("productsBody"); const f=(filter||"").toLowerCase();
+  const list=PRODUCTS.filter(p=>(p.name||"").toLowerCase().includes(f)||(p.name_ar||"").includes(filter||""));
+  if(!PRODUCTS.length){ body.innerHTML=`<tr><td colspan="6" class="empty">${t("empty_products")}</td></tr>`; return; }
+  if(!list.length){ body.innerHTML=`<tr><td colspan="6" class="empty">${t("no_match")}</td></tr>`; return; }
+  body.innerHTML=list.map(p=>{
+    const img=p.main_image||(p.product_images&&p.product_images[0]&&p.product_images[0].url)||"";
+    const status=p.new_arrival?`<span class="tag new">${t("tag_new")}</span>`:(p.featured?`<span class="tag">${t("tag_featured")}</span>`:`<span class="tag live">${t("tag_live")}</span>`);
+    return `<tr data-id="${p.id}">
+      <td>${img?`<img class="row-thumb" src="${esc(img)}" loading="lazy">`:`<div class="row-thumb"></div>`}</td>
+      <td>${esc(LANG==="ar"&&p.name_ar?p.name_ar:p.name)}</td>
+      <td>${esc(colLabel(p.collection))}</td>
+      <td>${esc(p.price||"—")}</td>
+      <td>${status}</td>
+      <td><div class="row-actions">
+        <button class="edit-btn">${t("edit")}</button>
+        <button class="danger delete-btn">${t("delete")}</button>
+      </div></td></tr>`;
+  }).join("");
+}
+$("productSearch").addEventListener("input", e=>renderProducts(e.target.value));
+$("productsBody").addEventListener("click", async e=>{
+  // tap a photo to view it large
+  if(e.target.tagName==="IMG" && e.target.classList.contains("row-thumb")){
+    $("lightboxImg").src=e.target.src; $("lightbox").classList.add("open"); return;
+  }
+  const row=e.target.closest("tr"); if(!row) return;
+  const p=PRODUCTS.find(x=>x.id===row.dataset.id); if(!p) return;
+  if(e.target.classList.contains("edit-btn")) openProductModal(p);
+  else if(e.target.classList.contains("delete-btn")){
+    if(!confirm(t("confirm_delete",{name:p.name}))) return;
+    try{ await sb.from("products").delete().eq("id",p.id);
+      PRODUCTS=PRODUCTS.filter(x=>x.id!==p.id); renderAll(); toast(t("t_removed")); }
+    catch(ex){ toast(ex.message,true); }
+  }
+});
+
+/* ---- product modal ---- */
+const productOverlay=$("productOverlay");
+let editingId=null, photos=[];
+function fillColSelect(){
+  $("fCol").innerHTML=COLLECTIONS.map(c=>`<option value="${esc(c.key)}">${esc(c.title)}</option>`).join("");
+}
+function drawPreviews(){
+  $("uploadPreview").innerHTML=photos.map((ph,i)=>`
+    <div class="ph"><img src="${esc(ph.url)}">${i===0?`<span class="main">${t("main_tag")}</span>`:""}<span class="x" data-rm="${i}">✕</span></div>`).join("");
+  $("uploadPreview").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.rm,1);drawPreviews();});
+}
+function openProductModal(p){
+  editingId=p?p.id:null;
+  $("productModalTitle").textContent=p?t("edit_product_title"):t("add_product_title");
+  $("fName").value=p?.name||""; $("fNameAr").value=p?.name_ar||"";
+  $("fPrice").value=(p?.price||"").replace(/^EGP\s*/i,"");
+  $("fWeight").value=p?.weight||""; $("fMetal").value=p?.metal||"";
+  $("fFeatured").checked=!!p?.featured; $("fNew").checked=!!p?.new_arrival;
+  $("fStock").checked=p?p.in_stock!==false:true;
+  fillColSelect(); $("fCol").value=p?.collection||(COLLECTIONS[0]&&COLLECTIONS[0].key)||"";
+  photos=[];
+  if(p){
+    const imgs=(p.product_images||[]).slice().sort((a,b)=>(b.is_main-a.is_main)||(a.display_order-b.display_order));
+    if(p.main_image) photos.push({url:p.main_image});
+    imgs.forEach(i=>{ if(i.url&&!photos.some(x=>x.url===i.url)) photos.push({url:i.url}); });
+  }
+  drawPreviews();
+  productOverlay.classList.add("open");
+}
+function closeProductModal(){ productOverlay.classList.remove("open"); }
+$("addProductBtn").onclick=()=>openProductModal(null);
+$("cancelProductBtn").onclick=closeProductModal;
+productOverlay.addEventListener("click",e=>{ if(e.target===productOverlay) closeProductModal(); });
+$("uploadBox").onclick=()=>$("fileInput").click();
+$("fileInput").onchange=()=>handleFiles([...$("fileInput").files]);
+["dragover","dragenter"].forEach(ev=>$("uploadBox").addEventListener(ev,e=>{e.preventDefault();$("uploadBox").classList.add("drag");}));
+["dragleave","drop"].forEach(ev=>$("uploadBox").addEventListener(ev,()=>$("uploadBox").classList.remove("drag")));
+$("uploadBox").addEventListener("drop",e=>{e.preventDefault();handleFiles([...e.dataTransfer.files]);});
+async function handleFiles(files){
+  for(const file of files){
+    if(!file.type.startsWith("image/")) continue;
+    $("uploadBox").textContent=t("uploading");
+    try{ const url=await uploadPhoto(file); photos.push({url}); drawPreviews(); toast(t("t_uploaded")); }
+    catch(ex){ toast(ex.message,true); }
+  }
+  $("uploadBox").textContent=t("upload_hint"); $("fileInput").value="";
+}
+$("productForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const name=$("fName").value.trim(); if(!name) return toast(t("need_name"),true);
+  const priceRaw=$("fPrice").value.trim().replace(/^EGP\s*/i,"");
+  const weight=$("fWeight").value.trim(), metal=$("fMetal").value.trim();
+  const btn=$("saveProductBtn"); btn.disabled=true; btn.textContent=t("saving");
+  const row={
+    name, name_ar:$("fNameAr").value.trim(),
+    collection:$("fCol").value, cat:colLabel($("fCol").value),
+    price: priceRaw?`EGP ${priceRaw}`:"", price_ar: priceRaw?`${priceRaw} ج.م`:"",
+    weight, weight_ar:weight, metal, specs: metal?{Metal:metal}:{},
+    featured:$("fFeatured").checked, new_arrival:$("fNew").checked, in_stock:$("fStock").checked,
+    main_image: photos[0]?.url||""
+  };
+  try{
+    let prod;
+    if(editingId){ prod=(await sb.from("products").update(row).eq("id",editingId).select().single()).data; }
+    else{ row.slug=slugify(name)+"-"+Math.random().toString(36).slice(2,6); prod=(await sb.from("products").insert(row).select().single()).data; }
+    await sb.from("product_images").delete().eq("product_id",prod.id);
+    if(photos.length){
+      await sb.from("product_images").insert(photos.map((ph,i)=>({product_id:prod.id,url:ph.url,alt:name,is_main:i===0,display_order:i})));
+    }
+    closeProductModal(); await loadAll();
+    toast(editingId?t("t_updated"):t("t_added"));
+  }catch(ex){ toast(ex.message,true); }
+  btn.disabled=false; btn.textContent=t("save_product");
+});
+
+/* ---------- collections ---------- */
+function renderCollections(){
+  $("collectionsBody").innerHTML=COLLECTIONS.length?COLLECTIONS.map(c=>`
+    <tr data-id="${c.id}">
+      <td><b>${esc(LANG==="ar"&&c.title_ar?c.title_ar:c.title)}</b></td>
+      <td style="color:var(--muted);max-width:320px">${esc((LANG==="ar"&&c.tag_ar?c.tag_ar:c.tag)||"")}</td>
+      <td>${PRODUCTS.filter(p=>p.collection===c.key).length}</td>
+      <td><button class="edit-col" style="color:var(--gold-deep);text-decoration:underline">${t("edit")}</button></td></tr>`).join("")
+    :`<tr><td colspan="4" class="empty">—</td></tr>`;
+  $("collectionsBody").querySelectorAll(".edit-col").forEach(b=>b.onclick=()=>openColModal(COLLECTIONS.find(c=>c.id===b.closest("tr").dataset.id)));
+}
+const colOverlay=$("colOverlay"); let editingColId=null;
+function openColModal(c){
+  editingColId=c.id;
+  $("cTitle").value=c.title||""; $("cTitleAr").value=c.title_ar||"";
+  $("cTag").value=c.tag||""; $("cTagAr").value=c.tag_ar||"";
+  colOverlay.classList.add("open");
+}
+$("cancelColBtn").onclick=()=>colOverlay.classList.remove("open");
+colOverlay.addEventListener("click",e=>{ if(e.target===colOverlay) colOverlay.classList.remove("open"); });
+$("colForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  try{
+    await sb.from("collections").update({
+      title:$("cTitle").value.trim(),title_ar:$("cTitleAr").value.trim(),
+      tag:$("cTag").value.trim(),tag_ar:$("cTagAr").value.trim()
+    }).eq("id",editingColId);
+    colOverlay.classList.remove("open"); await loadAll(); toast(t("t_col_saved"));
+  }catch(ex){ toast(ex.message,true); }
+});
+
+/* ---------- homepage text (simple) ---------- */
+const HOME_FIELDS=[
+  {key:"hero_h1",labelKey:"home_big_title",multi:true,br:true},
+  {key:"hero_p",labelKey:"home_subtitle",multi:true},
+  {key:"hero_btn",labelKey:"home_button"},
+  {key:"footer_rights",labelKey:"home_footer"}
+];
+const stripTags = (s="") => s.replace(/<br\s*\/?>/gi,"\n").replace(/<\/?[^>]+>/g,"");
+const toHtml = (s="") => esc(s).replace(/\n/g,"<br>");
+function renderHomepage(){
+  $("homeFields").innerHTML=HOME_FIELDS.map(f=>{
+    const v=CONTENT[f.key]||{};
+    const en=f.br?stripTags(v.en||""):(v.en||""); const ar=f.br?stripTags(v.ar||""):(v.ar||"");
+    const inp=(id,val,rtl)=> f.multi
+      ? `<textarea id="${id}" rows="2" ${rtl?'dir="rtl"':''}>${esc(val)}</textarea>`
+      : `<input id="${id}" ${rtl?'dir="rtl"':''} value="${esc(val)}">`;
+    return `<div class="field"><label>${t(f.labelKey)}</label>
+      <div class="bi-grid">
+        <div>${inp("home_en_"+f.key,en)}<small>${t("english")}</small></div>
+        <div>${inp("home_ar_"+f.key,ar,true)}<small>${t("arabic")}</small></div>
+      </div></div>`;
+  }).join("");
+}
+$("saveHomeBtn").onclick=async ()=>{
+  const rows=HOME_FIELDS.map(f=>{
+    let en=$("home_en_"+f.key).value, ar=$("home_ar_"+f.key).value;
+    if(f.br){ en=en.replace(/\n/g,"<br>"); ar=ar.replace(/\n/g,"<br>"); }
+    return {key:f.key,en,ar};
+  });
+  try{ await sb.from("content").upsert(rows); await loadAll(); toast(t("t_home_saved")); }
+  catch(ex){ toast(ex.message,true); }
+};
+
+/* ---------- settings ---------- */
+const SETTING_KEYS=["whatsapp_1","whatsapp_2","phone","email","address","hours","maps","instagram","facebook","tiktok"];
+function renderSettings(){
+  $("settingsFields").innerHTML=SETTING_KEYS.map(k=>
+    `<div class="field"><label>${t("s_"+k)}</label><input id="set_${k}" value="${esc(CONTACT[k]||"")}" ${k==="address"||k==="hours"?"":'dir="ltr"'}></div>`).join("");
+}
+$("saveSettingsBtn").onclick=async ()=>{
+  const out={...CONTACT}; SETTING_KEYS.forEach(k=>out[k]=$("set_"+k).value.trim());
+  try{ await sb.from("settings").upsert({key:"contact",value:out}); CONTACT=out; toast(t("t_settings_saved")); }
+  catch(ex){ toast(ex.message,true); }
+};
+
+/* ---------- boot ---------- */
+(async function(){
+  applyI18n();
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ window.location.replace("/admin/login.html"); return; }
+  $("whoami").textContent=session.user.email;
+  try{ await loadAll(); }
+  catch(ex){ toast("Could not load data: "+ex.message,true); console.error(ex); }
+})();
+</script>
+</body>
+</html>
