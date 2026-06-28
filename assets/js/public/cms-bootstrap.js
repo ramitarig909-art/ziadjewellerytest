@@ -1,6 +1,5 @@
 /* cms-bootstrap.js — loads live Supabase content onto the public site. */
 (async function () {
-  /* Mobile UX: keep the "Back to collections" button always visible while scrolling. */
   try {
     const st = document.createElement("style");
     st.textContent =
@@ -16,16 +15,26 @@
   const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 
   try {
-    const [contentRes, colRes, prodRes, setRes] = await Promise.all([
+    const [contentRes, colRes, prodRes, setRes, revRes] = await Promise.all([
       sb.from("content").select("key,en,ar"),
       sb.from("collections").select("*").order("display_order"),
       sb.from("products").select("*, product_images(url,thumb_url,is_main,display_order)")
         .eq("in_stock", true).order("display_order"),
-      sb.from("settings").select("key,value")
+      sb.from("settings").select("key,value"),
+      sb.from("reviews").select("*").order("display_order")
     ]);
 
     if (contentRes.data && typeof T === "object") {
-      contentRes.data.forEach((r) => { if (r.key) T[r.key] = { en: r.en || "", ar: r.ar || r.en || "" }; });
+      contentRes.data.forEach((r) => { if (r.key && (r.en || r.ar)) T[r.key] = { en: r.en || r.ar, ar: r.ar || r.en }; });
+    }
+
+    if (revRes.data && revRes.data.length && typeof reviews !== "undefined" && Array.isArray(reviews)) {
+      reviews.length = 0;
+      revRes.data.forEach((r) => reviews.push({
+        ini: (r.name || "?").trim().charAt(0).toUpperCase(),
+        name: r.name, role: r.role || "Google review", role_ar: r.role || "مراجعة على Google",
+        stars: r.stars || 5, text: r.text || "", text_ar: r.text_ar || r.text || ""
+      }));
     }
 
     if (colRes.data && colRes.data.length && typeof collections !== "undefined") {
