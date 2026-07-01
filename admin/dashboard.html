@@ -533,7 +533,7 @@ function openCalc(){
   const names=[...new Set(PRODUCTS.map(p=>(p.name||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   $("calcName").innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(n)} (${PRODUCTS.filter(p=>(p.name||"").trim()===n).length})</option>`).join("");
   // specific-products list with a clear image for each
-  $("calcProdList").innerHTML=PRODUCTS.map(p=>{const img=prodImg(p);return `<label style="display:flex;gap:.7rem;align-items:center;padding:.4rem 0;font-weight:400;border-bottom:1px solid var(--line-soft)"><input type="checkbox" class="calc-p" value="${p.id}" style="width:18px;height:18px;flex:none">${img?`<img src="${esc(img)}" style="width:56px;height:56px;object-fit:contain;background:var(--sand);border-radius:5px;flex:none">`:`<span style="width:56px;height:56px;background:var(--sand);border-radius:5px;flex:none;display:inline-block"></span>`}<span style="flex:1">${esc(LANG==="ar"&&p.name_ar?p.name_ar:p.name)} <span style="color:${parseWeight(p.weight)?'var(--muted)':'var(--warn)'};font-size:.82rem">(${parseWeight(p.weight)?esc(p.weight):t("no_weight")})</span></span></label>`;}).join("");
+  $("calcProdList").innerHTML=PRODUCTS.map(p=>{const img=prodImg(p);return `<label style="display:flex;gap:.7rem;align-items:center;padding:.4rem 0;font-weight:400;border-bottom:1px solid var(--line-soft)"><input type="checkbox" class="calc-p" value="${p.id}" style="width:18px;height:18px;flex:none">${img?`<img class="calc-img" src="${esc(img)}" title="Click to zoom" style="width:56px;height:56px;object-fit:contain;background:var(--sand);border-radius:5px;flex:none;cursor:zoom-in">`:`<span style="width:56px;height:56px;background:var(--sand);border-radius:5px;flex:none;display:inline-block"></span>`}<span style="flex:1">${esc(LANG==="ar"&&p.name_ar?p.name_ar:p.name)} <span style="color:${parseWeight(p.weight)?'var(--muted)':'var(--warn)'};font-size:.82rem">(${parseWeight(p.weight)?esc(p.weight):t("no_weight")})</span></span></label>`;}).join("");
   updateCalcPreview();calcOverlay.classList.add("open");
 }
 $("calcBtn").onclick=openCalc;
@@ -544,6 +544,7 @@ $("calcCol").onchange=updateCalcPreview;
 $("calcName").onchange=updateCalcPreview;
 ["input","change"].forEach(ev=>{$("calcGold").addEventListener(ev,updateCalcPreview);$("calcMaking").addEventListener(ev,updateCalcPreview);});
 $("calcProdList").addEventListener("change",updateCalcPreview);
+$("calcProdList").addEventListener("click",e=>{ if(e.target.classList.contains("calc-img")){ e.preventDefault(); e.stopPropagation(); $("lightboxImg").src=e.target.src; $("lightbox").classList.add("open"); } });
 $("applyCalcBtn").onclick=async()=>{
   const gold=parseFloat($("calcGold").value)||0,making=parseFloat($("calcMaking").value)||0;
   if(!gold&&!making)return toast(t("calc_enter_prices"),true);
