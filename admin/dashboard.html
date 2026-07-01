@@ -51,7 +51,7 @@ input,select,textarea{font-family:inherit;font-size:1rem}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold-deep)}
 
 .card{background:#fff;border:1px solid var(--line-soft);border-radius:6px;padding:1.4rem}
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.8rem}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.8rem}
 .stat{background:#fff;border:1px solid var(--line-soft);border-radius:6px;padding:1.1rem 1.2rem}
 .stat .n{font-family:var(--serif);font-size:2rem;color:var(--gold-deep)}
 html[dir="rtl"] .stat .n{font-family:'Cairo'}
@@ -70,7 +70,7 @@ img.row-thumb:hover{transform:scale(1.04)}
 .lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
 .lightbox .x{position:fixed;top:16px;inset-inline-end:20px;color:#fff;font-size:2rem;line-height:1;opacity:.85}
 .tag{display:inline-block;font-size:.72rem;padding:.28rem .6rem;border-radius:3px;background:var(--pearl);color:var(--gold-deep)}
-.tag.new{background:#f4ece0;color:var(--gold-deep)}.tag.live{background:#eef2ea;color:var(--ok)}
+.tag.new{background:#f4ece0;color:var(--gold-deep)}.tag.live{background:#eef2ea;color:var(--ok)}.tag.out{background:#f7e9e6;color:var(--warn)}
 .row-actions{display:flex;gap:1rem;font-size:.86rem}
 .row-actions button{color:var(--muted);min-height:40px}
 .row-actions button:hover{color:var(--gold-deep)}.row-actions button.danger:hover{color:var(--warn)}
@@ -154,8 +154,10 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
       <div class="page-head"><div><h1 data-i18n="ov_title">Overview</h1><p data-i18n="ov_sub">A quick look at what's live on your website</p></div></div>
       <div class="stat-row">
         <div class="stat"><div class="n" id="statProducts">–</div><div class="l" data-i18n="st_products">Products</div></div>
+        <div class="stat"><div class="n" id="statCollections">–</div><div class="l" data-i18n="st_collections">Collections</div></div>
         <div class="stat"><div class="n" id="statBest">–</div><div class="l" data-i18n="st_bestsellers">Best Sellers</div></div>
         <div class="stat"><div class="n" id="statNew">–</div><div class="l" data-i18n="st_new">New Arrivals</div></div>
+        <div class="stat"><div class="n" id="statOut">–</div><div class="l" data-i18n="st_out">Out of Stock</div></div>
         <div class="stat"><div class="n" id="statReviews">–</div><div class="l" data-i18n="st_reviews">Reviews</div></div>
       </div>
       <div class="card">
@@ -171,8 +173,8 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
     </section>
 
     <section id="page-collections" class="page" hidden>
-      <div class="page-head"><div><h1 data-i18n="col_title">Collections</h1><p data-i18n="col_sub">The categories visitors browse on the homepage</p></div></div>
-      <div class="card" style="padding:0"><div class="table-scroll"><table><thead><tr><th data-i18n="th_collection">Collection</th><th data-i18n="th_tagline">Tagline</th><th data-i18n="th_products_count">Products</th><th></th></tr></thead><tbody id="collectionsBody"><tr><td colspan="4" class="loading">…</td></tr></tbody></table></div></div>
+      <div class="page-head"><div><h1 data-i18n="col_title">Collections</h1><p data-i18n="col_sub">The categories visitors browse on the homepage</p></div><button class="btn btn-gold" id="addColBtn" data-i18n="add_collection">+ Add Collection</button></div>
+      <div class="card" style="padding:0"><div class="table-scroll"><table><thead><tr><th></th><th data-i18n="th_collection">Collection</th><th data-i18n="th_tagline">Tagline</th><th data-i18n="th_products_count">Products</th><th></th></tr></thead><tbody id="collectionsBody"><tr><td colspan="5" class="loading">…</td></tr></tbody></table></div></div>
     </section>
 
     <section id="page-reviews" class="page" hidden>
@@ -206,15 +208,20 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
     <div class="toggle-line"><input type="checkbox" id="fFeatured" /><label for="fFeatured" data-i18n="bestseller_toggle">Show in Best Sellers section</label></div>
     <div class="toggle-line"><input type="checkbox" id="fNew" /><label for="fNew" data-i18n="new_toggle">Show "New" tag</label></div>
     <div class="toggle-line"><input type="checkbox" id="fStock" checked /><label for="fStock" data-i18n="stock_toggle">In stock (visible on site)</label></div>
+    <div class="toggle-line"><input type="checkbox" id="fOut" /><label for="fOut" data-i18n="outstock_toggle">Out of stock</label></div>
     <div class="modal-foot"><button type="button" class="btn btn-ghost" id="cancelProductBtn" data-i18n="cancel">Cancel</button><button type="submit" class="btn btn-gold" id="saveProductBtn" data-i18n="save_product">Save Product</button></div>
   </form>
 </div></div>
 
 <!-- Collection modal -->
 <div class="overlay" id="colOverlay"><div class="modal">
-  <h2 data-i18n="edit_collection">Edit Collection</h2><div class="sub" data-i18n="col_modal_sub">Edit the title and tagline shown on the homepage.</div>
+  <h2 id="colModalTitle">Edit Collection</h2><div class="sub" data-i18n="col_modal_sub">Edit the title and tagline shown on the homepage.</div>
   <form id="colForm">
+    <div class="field"><label data-i18n="col_cover">Cover image</label>
+      <div class="upload-box" id="colUploadBox" data-i18n="upload_cover">Click to upload a cover image</div>
+      <input type="file" id="colFile" accept="image/*" hidden /><div class="upload-preview" id="colPreview"></div></div>
     <div class="field-row"><div class="field"><label data-i18n="title_en">Title (English)</label><input id="cTitle" required /></div><div class="field"><label data-i18n="title_ar">Title (Arabic)</label><input id="cTitleAr" dir="rtl" /></div></div>
+    <div class="field-row"><div class="field"><label data-i18n="col_key">Key (used in links)</label><input id="cKey" /></div><div class="field"><label data-i18n="col_order">Display order</label><input id="cOrder" type="number" /></div></div>
     <div class="field"><label data-i18n="tagline_en">Tagline (English)</label><textarea id="cTag" rows="2"></textarea></div>
     <div class="field"><label data-i18n="tagline_ar">Tagline (Arabic)</label><textarea id="cTagAr" dir="rtl" rows="2"></textarea></div>
     <div class="modal-foot"><button type="button" class="btn btn-ghost" id="cancelColBtn" data-i18n="cancel">Cancel</button><button type="submit" class="btn btn-gold" data-i18n="save">Save</button></div>
@@ -265,7 +272,9 @@ const I18N={
   set_title:"Contact & Settings",set_sub:"Used across the site and in your WhatsApp buttons",
   s_whatsapp_1:"WhatsApp number 1 (digits only, e.g. 201091198726)",s_whatsapp_2:"WhatsApp number 2 (optional)",s_phone:"Phone",s_email:"Email",s_address:"Showroom address",s_hours:"Opening hours",s_maps:"Google Maps link",s_instagram:"Instagram link",s_facebook:"Facebook link",s_tiktok:"TikTok link",
   t_removed:"Removed",t_uploaded:"Photo uploaded",t_added:"Added — live on the site",t_updated:"Updated — live on the site",t_col_saved:"Collection saved",t_review_saved:"Review saved",t_home_saved:"Homepage text saved",t_settings_saved:"Settings saved",
-  need_name:"Please enter a name",main_tag:"MAIN"},
+  need_name:"Please enter a name",main_tag:"MAIN",
+  st_collections:"Collections",st_out:"Out of Stock",tag_out:"Out of Stock",outstock_toggle:"Out of stock (hides it from the site)",
+  add_collection:"+ Add Collection",add_collection_title:"Add Collection",col_cover:"Cover image",upload_cover:"Click to upload a cover image",col_key:"Key (used in links, e.g. rings)",col_order:"Display order"},
  ar:{owner_dashboard:"لوحة التحكم",nav_overview:"نظرة عامة",nav_products:"المنتجات",nav_collections:"المجموعات",nav_reviews:"الآراء",nav_homepage:"نصوص الصفحة الرئيسية",nav_settings:"التواصل والإعدادات",view_site:"↗ عرض الموقع",sign_out:"تسجيل الخروج",lang_btn:"English",
   ov_title:"نظرة عامة",ov_sub:"نظرة سريعة على ما هو منشور على موقعك",st_products:"المنتجات",st_bestsellers:"الأكثر مبيعاً",st_new:"وصل حديثاً",st_reviews:"الآراء",
   recent:"آخر التحديثات",th_product:"المنتج",th_collection:"المجموعة",th_price:"السعر",
@@ -285,7 +294,9 @@ const I18N={
   set_title:"التواصل والإعدادات",set_sub:"تُستخدم في الموقع وأزرار واتساب",
   s_whatsapp_1:"رقم واتساب 1 (أرقام فقط، مثال 201091198726)",s_whatsapp_2:"رقم واتساب 2 (اختياري)",s_phone:"الهاتف",s_email:"البريد الإلكتروني",s_address:"عنوان المعرض",s_hours:"مواعيد العمل",s_maps:"رابط خرائط جوجل",s_instagram:"رابط انستجرام",s_facebook:"رابط فيسبوك",s_tiktok:"رابط تيك توك",
   t_removed:"تم الحذف",t_uploaded:"تم رفع الصورة",t_added:"تمت الإضافة — منشور على الموقع",t_updated:"تم التحديث — منشور على الموقع",t_col_saved:"تم حفظ المجموعة",t_review_saved:"تم حفظ الرأي",t_home_saved:"تم حفظ النصوص",t_settings_saved:"تم حفظ الإعدادات",
-  need_name:"الرجاء إدخال الاسم",main_tag:"رئيسية"}
+  need_name:"الرجاء إدخال الاسم",main_tag:"رئيسية",
+  st_collections:"المجموعات",st_out:"غير متوفّر",tag_out:"غير متوفّر",outstock_toggle:"غير متوفّر (يُخفيه من الموقع)",
+  add_collection:"+ إضافة مجموعة",add_collection_title:"إضافة مجموعة",col_cover:"صورة الغلاف",upload_cover:"اضغط لرفع صورة الغلاف",col_key:"المفتاح (يُستخدم في الروابط، مثال rings)",col_order:"ترتيب العرض"}
 };
 function t(key,vars){ let s=(I18N[LANG]&&I18N[LANG][key])||I18N.en[key]||key; if(vars)Object.keys(vars).forEach(k=>s=s.replace("{"+k+"}",vars[k])); return s; }
 
@@ -396,8 +407,10 @@ function renderAll(){ fillColSelect(); renderOverview(); renderProducts($("produ
 /* ---------- overview ---------- */
 function renderOverview(){
   $("statProducts").textContent=PRODUCTS.length;
+  $("statCollections").textContent=COLLECTIONS.length;
   $("statBest").textContent=PRODUCTS.filter(p=>p.featured).length;
   $("statNew").textContent=PRODUCTS.filter(p=>p.new_arrival).length;
+  $("statOut").textContent=PRODUCTS.filter(p=>p.in_stock===false).length;
   $("statReviews").textContent=REVIEWS.length;
   const recent=[...PRODUCTS].sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at)).slice(0,5);
   $("recentBody").innerHTML=recent.length?recent.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(colLabel(p.collection))}</td><td>${esc(p.price||"—")}</td></tr>`).join(""):`<tr><td colspan="3" class="empty">${t("empty_products")}</td></tr>`;
@@ -411,7 +424,7 @@ function renderProducts(filter=""){
   if(!list.length){body.innerHTML=`<tr><td colspan="6" class="empty">${t("no_match")}</td></tr>`;return;}
   body.innerHTML=list.map(p=>{
     const img=p.main_image||(p.product_images&&p.product_images[0]&&p.product_images[0].url)||"";
-    const status=p.new_arrival?`<span class="tag new">${t("tag_new")}</span>`:(p.featured?`<span class="tag">${t("tag_bestseller")}</span>`:`<span class="tag live">${t("tag_live")}</span>`);
+    const status=p.in_stock===false?`<span class="tag out">${t("tag_out")}</span>`:(p.new_arrival?`<span class="tag new">${t("tag_new")}</span>`:(p.featured?`<span class="tag">${t("tag_bestseller")}</span>`:`<span class="tag live">${t("tag_live")}</span>`));
     return `<tr data-id="${p.id}"><td>${img?`<img class="row-thumb" src="${esc(img)}" loading="lazy">`:`<div class="row-thumb"></div>`}</td><td>${esc(LANG==="ar"&&p.name_ar?p.name_ar:p.name)}</td><td>${esc(colLabel(p.collection))}</td><td>${esc(p.price||"—")}</td><td>${status}</td><td><div class="row-actions"><button class="edit-btn">${t("edit")}</button><button class="danger delete-btn">${t("delete")}</button></div></td></tr>`;
   }).join("");
 }
@@ -434,7 +447,8 @@ function openProductModal(p){
   $("productModalTitle").textContent=p?t("edit_product_title"):t("add_product_title");
   $("fName").value=p?.name||"";$("fNameAr").value=p?.name_ar||"";
   $("fPrice").value=(p?.price||"").replace(/^EGP\s*/i,"");$("fWeight").value=p?.weight||"";$("fMetal").value=p?.metal||"";
-  $("fFeatured").checked=!!p?.featured;$("fNew").checked=!!p?.new_arrival;$("fStock").checked=p?p.in_stock!==false:true;
+  $("fFeatured").checked=!!p?.featured;$("fNew").checked=!!p?.new_arrival;
+  $("fStock").checked=p?p.in_stock!==false:true;$("fOut").checked=p?p.in_stock===false:false;
   fillColSelect();$("fCol").value=p?.collection||(COLLECTIONS[0]&&COLLECTIONS[0].key)||"";
   photos=[];
   if(p){const imgs=(p.product_images||[]).slice().sort((a,b)=>(b.is_main-a.is_main)||(a.display_order-b.display_order));if(p.main_image)photos.push({url:p.main_image});imgs.forEach(i=>{if(i.url&&!photos.some(x=>x.url===i.url))photos.push({url:i.url});});}
@@ -443,6 +457,9 @@ function openProductModal(p){
 function closeProductModal(){productOverlay.classList.remove("open");}
 $("addProductBtn").onclick=()=>openProductModal(null);
 $("cancelProductBtn").onclick=closeProductModal;
+/* keep In-stock / Out-of-stock toggles mutually exclusive */
+$("fStock").addEventListener("change",()=>{ if($("fStock").checked)$("fOut").checked=false; });
+$("fOut").addEventListener("change",()=>{ if($("fOut").checked)$("fStock").checked=false; });
 productOverlay.addEventListener("click",e=>{if(e.target===productOverlay)closeProductModal();});
 $("uploadBox").onclick=()=>$("fileInput").click();
 $("fileInput").onchange=()=>handleFiles([...$("fileInput").files]);
@@ -454,7 +471,7 @@ $("productForm").addEventListener("submit",async e=>{
   e.preventDefault();const name=$("fName").value.trim();if(!name)return toast(t("need_name"),true);
   const priceRaw=$("fPrice").value.trim().replace(/^EGP\s*/i,""),weight=$("fWeight").value.trim(),metal=$("fMetal").value.trim();
   const btn=$("saveProductBtn");btn.disabled=true;btn.textContent=t("saving");
-  const row={name,name_ar:$("fNameAr").value.trim(),collection:$("fCol").value,cat:colLabel($("fCol").value),price:priceRaw?`EGP ${priceRaw}`:"",price_ar:priceRaw?`${priceRaw} ج.م`:"",weight,weight_ar:weight,metal,specs:metal?{Metal:metal}:{},featured:$("fFeatured").checked,new_arrival:$("fNew").checked,in_stock:$("fStock").checked,main_image:photos[0]?.url||""};
+  const row={name,name_ar:$("fNameAr").value.trim(),collection:$("fCol").value,cat:colLabel($("fCol").value),price:priceRaw?`EGP ${priceRaw}`:"",price_ar:priceRaw?`${priceRaw} ج.م`:"",weight,weight_ar:weight,metal,specs:metal?{Metal:metal}:{},featured:$("fFeatured").checked,new_arrival:$("fNew").checked,in_stock:!$("fOut").checked,main_image:photos[0]?.url||""};
   try{
     let prod;
     if(editingId)prod=(await sb.from("products").update(row).eq("id",editingId).select().single()).data;
@@ -468,14 +485,35 @@ $("productForm").addEventListener("submit",async e=>{
 
 /* ---------- collections ---------- */
 function renderCollections(){
-  $("collectionsBody").innerHTML=COLLECTIONS.length?COLLECTIONS.map(c=>`<tr data-id="${c.id}"><td><b>${esc(LANG==="ar"&&c.title_ar?c.title_ar:c.title)}</b></td><td style="color:var(--muted);max-width:320px">${esc((LANG==="ar"&&c.tag_ar?c.tag_ar:c.tag)||"")}</td><td>${PRODUCTS.filter(p=>p.collection===c.key).length}</td><td><button class="edit-col" style="color:var(--gold-deep);text-decoration:underline">${t("edit")}</button></td></tr>`).join(""):`<tr><td colspan="4" class="empty">—</td></tr>`;
+  $("collectionsBody").innerHTML=COLLECTIONS.length?COLLECTIONS.map(c=>`<tr data-id="${c.id}"><td>${c.img?`<img class="row-thumb" src="${esc(c.img)}" loading="lazy">`:`<div class="row-thumb"></div>`}</td><td><b>${esc(LANG==="ar"&&c.title_ar?c.title_ar:c.title)}</b></td><td style="color:var(--muted);max-width:300px">${esc((LANG==="ar"&&c.tag_ar?c.tag_ar:c.tag)||"")}</td><td>${PRODUCTS.filter(p=>p.collection===c.key).length}</td><td><button class="edit-col" style="color:var(--gold-deep);text-decoration:underline">${t("edit")}</button></td></tr>`).join(""):`<tr><td colspan="5" class="empty">—</td></tr>`;
   $("collectionsBody").querySelectorAll(".edit-col").forEach(b=>b.onclick=()=>openColModal(COLLECTIONS.find(c=>c.id===b.closest("tr").dataset.id)));
 }
-const colOverlay=$("colOverlay");let editingColId=null;
-function openColModal(c){editingColId=c.id;$("cTitle").value=c.title||"";$("cTitleAr").value=c.title_ar||"";$("cTag").value=c.tag||"";$("cTagAr").value=c.tag_ar||"";colOverlay.classList.add("open");}
+const colOverlay=$("colOverlay");let editingColId=null,colCover="";
+function drawColCover(){$("colPreview").innerHTML=colCover?`<div class="ph"><img src="${esc(colCover)}"><span class="x" id="colRm">✕</span></div>`:"";const rm=$("colRm");if(rm)rm.onclick=()=>{colCover="";drawColCover();};}
+function openColModal(c){
+  editingColId=c?c.id:null;
+  $("colModalTitle").textContent=c?t("edit_collection"):t("add_collection_title");
+  $("cTitle").value=c?.title||"";$("cTitleAr").value=c?.title_ar||"";
+  $("cTag").value=c?.tag||"";$("cTagAr").value=c?.tag_ar||"";
+  $("cKey").value=c?.key||"";$("cKey").readOnly=!!c;
+  $("cOrder").value=c?(c.display_order||0):(COLLECTIONS.length+1);
+  colCover=c?.img||"";drawColCover();
+  colOverlay.classList.add("open");
+}
+$("addColBtn").onclick=()=>openColModal(null);
 $("cancelColBtn").onclick=()=>colOverlay.classList.remove("open");
 colOverlay.addEventListener("click",e=>{if(e.target===colOverlay)colOverlay.classList.remove("open");});
-$("colForm").addEventListener("submit",async e=>{e.preventDefault();try{await sb.from("collections").update({title:$("cTitle").value.trim(),title_ar:$("cTitleAr").value.trim(),tag:$("cTag").value.trim(),tag_ar:$("cTagAr").value.trim()}).eq("id",editingColId);colOverlay.classList.remove("open");await loadAll();toast(t("t_col_saved"));}catch(ex){toast(ex.message,true);}});
+$("colUploadBox").onclick=()=>$("colFile").click();
+$("colFile").onchange=async()=>{const f=$("colFile").files[0];if(!f)return;$("colUploadBox").textContent=t("uploading");try{colCover=await uploadPhoto(f);drawColCover();toast(t("t_uploaded"));}catch(ex){toast(ex.message,true);}$("colUploadBox").textContent=t("upload_cover");$("colFile").value="";};
+$("colForm").addEventListener("submit",async e=>{
+  e.preventDefault();const title=$("cTitle").value.trim();if(!title)return toast(t("need_name"),true);
+  const row={title,title_ar:$("cTitleAr").value.trim(),tag:$("cTag").value.trim(),tag_ar:$("cTagAr").value.trim(),img:colCover,display_order:parseInt($("cOrder").value)||0};
+  try{
+    if(editingColId){await sb.from("collections").update(row).eq("id",editingColId);}
+    else{row.key=($("cKey").value.trim()||slugify(title));await sb.from("collections").insert(row);}
+    colOverlay.classList.remove("open");await loadAll();toast(t("t_col_saved"));
+  }catch(ex){toast(ex.message,true);}
+});
 
 /* ---------- reviews ---------- */
 function renderReviews(){
