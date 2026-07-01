@@ -6,7 +6,11 @@
       "@media(max-width:760px){#collectionPage.active .back-link{" +
       "position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:1500;margin:0;" +
       "background:#14110c;color:#c8a24a;border:1px solid rgba(200,162,71,.6);padding:.7rem 1.4rem;" +
-      "border-radius:40px;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:.82rem;white-space:nowrap}}";
+      "border-radius:40px;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:.82rem;white-space:nowrap}}" +
+      ".prod-thumb{position:relative}" +
+      ".oos-badge{position:absolute;top:10px;right:10px;z-index:4;background:#a8442e;color:#fff;" +
+      "font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .55rem;" +
+      "border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.25)}";
     document.head.appendChild(st);
   } catch (e) {}
 
@@ -18,8 +22,7 @@
     const [contentRes, colRes, prodRes, setRes, revRes] = await Promise.all([
       sb.from("content").select("key,en,ar"),
       sb.from("collections").select("*").order("display_order"),
-      sb.from("products").select("*, product_images(url,thumb_url,is_main,display_order)")
-        .eq("in_stock", true).order("display_order"),
+      sb.from("products").select("*, product_images(url,thumb_url,is_main,display_order)").order("display_order"),
       sb.from("settings").select("key,value"),
       sb.from("reviews").select("*").order("display_order")
     ]);
@@ -90,9 +93,27 @@
       if (contact.hours) T["val_hours"] = { en: contact.hours, ar: contact.hours };
     }
 
+    const outUrls = new Set((prodRes.data || []).filter((p) => p.in_stock === false && p.main_image).map((p) => p.main_image));
+    function badgeCards() {
+      document.querySelectorAll(".prod-card .prod-thumb").forEach((th) => {
+        const img = th.querySelector("img"); if (!img) return;
+        const isOut = outUrls.has(img.getAttribute("src")) || outUrls.has(img.src);
+        let b = th.querySelector(".oos-badge");
+        if (isOut) {
+          if (!b) { b = document.createElement("span"); b.className = "oos-badge"; th.appendChild(b); }
+          b.textContent = (typeof LANG !== "undefined" && LANG === "ar") ? "غير متوفّر" : "Out of Stock";
+        } else if (b) { b.remove(); }
+      });
+    }
+    if (!window.__oosObs) {
+      window.__oosObs = new MutationObserver(() => { clearTimeout(window.__oosT); window.__oosT = setTimeout(badgeCards, 60); });
+      window.__oosObs.observe(document.body, { childList: true, subtree: true });
+    }
+
     if (typeof setLang === "function") setLang(typeof LANG !== "undefined" ? LANG : "en");
     if (typeof bindGeneralWa === "function") bindGeneralWa();
     if (typeof handleHash === "function") handleHash();
+    badgeCards();
   } catch (err) {
     console.warn("[ZIAD CMS] Live content unavailable, using built-in content.", err);
   }
