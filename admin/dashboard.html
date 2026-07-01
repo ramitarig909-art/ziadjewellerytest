@@ -485,8 +485,14 @@ $("productForm").addEventListener("submit",async e=>{
 
 /* ---------- collections ---------- */
 function renderCollections(){
-  $("collectionsBody").innerHTML=COLLECTIONS.length?COLLECTIONS.map(c=>`<tr data-id="${c.id}"><td>${c.img?`<img class="row-thumb" src="${esc(c.img)}" loading="lazy">`:`<div class="row-thumb"></div>`}</td><td><b>${esc(LANG==="ar"&&c.title_ar?c.title_ar:c.title)}</b></td><td style="color:var(--muted);max-width:300px">${esc((LANG==="ar"&&c.tag_ar?c.tag_ar:c.tag)||"")}</td><td>${PRODUCTS.filter(p=>p.collection===c.key).length}</td><td><button class="edit-col" style="color:var(--gold-deep);text-decoration:underline">${t("edit")}</button></td></tr>`).join(""):`<tr><td colspan="5" class="empty">—</td></tr>`;
+  $("collectionsBody").innerHTML=COLLECTIONS.length?COLLECTIONS.map(c=>`<tr data-id="${c.id}"><td>${c.img?`<img class="row-thumb" src="${esc(c.img)}" loading="lazy">`:`<div class="row-thumb"></div>`}</td><td><b>${esc(LANG==="ar"&&c.title_ar?c.title_ar:c.title)}</b></td><td style="color:var(--muted);max-width:300px">${esc((LANG==="ar"&&c.tag_ar?c.tag_ar:c.tag)||"")}</td><td>${PRODUCTS.filter(p=>p.collection===c.key).length}</td><td><div class="row-actions"><button class="edit-col">${t("edit")}</button><button class="danger del-col">${t("delete")}</button></div></td></tr>`).join(""):`<tr><td colspan="5" class="empty">—</td></tr>`;
   $("collectionsBody").querySelectorAll(".edit-col").forEach(b=>b.onclick=()=>openColModal(COLLECTIONS.find(c=>c.id===b.closest("tr").dataset.id)));
+  $("collectionsBody").querySelectorAll(".del-col").forEach(b=>b.onclick=async()=>{
+    const c=COLLECTIONS.find(x=>x.id===b.closest("tr").dataset.id);
+    if(!confirm(t("confirm_delete",{name:LANG==="ar"&&c.title_ar?c.title_ar:c.title})))return;
+    try{await sb.from("collections").delete().eq("id",c.id);COLLECTIONS=COLLECTIONS.filter(x=>x.id!==c.id);renderCollections();renderOverview();toast(t("t_removed"));}
+    catch(ex){toast(ex.message,true);}
+  });
 }
 const colOverlay=$("colOverlay");let editingColId=null,colCover="";
 function drawColCover(){$("colPreview").innerHTML=colCover?`<div class="ph"><img src="${esc(colCover)}"><span class="x" id="colRm">✕</span></div>`:"";const rm=$("colRm");if(rm)rm.onclick=()=>{colCover="";drawColCover();};}
