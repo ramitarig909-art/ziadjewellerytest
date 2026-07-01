@@ -8,6 +8,7 @@
       "background:#14110c;color:#c8a24a;border:1px solid rgba(200,162,71,.6);padding:.7rem 1.4rem;" +
       "border-radius:40px;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:.82rem;white-space:nowrap}}" +
       ".prod-thumb{position:relative}" +
+      ".prod-thumb img{object-fit:cover!important}" +
       ".oos-badge{position:absolute;top:10px;right:10px;z-index:4;background:#a8442e;color:#fff;" +
       "font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .55rem;" +
       "border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.25)}";
