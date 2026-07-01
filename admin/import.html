@@ -44,6 +44,7 @@ a.back{color:var(--gold-deep);font-size:.8rem;text-decoration:none}
   <div class="card">
     <button class="btn" id="runBtn">Import products from website</button>
     <button class="btn" id="coversBtn" style="margin-left:.6rem">Import collection covers</button>
+    <button class="btn btn-ghost" id="restoreBtn" style="margin-left:.6rem">Restore original prices</button>
     <button class="btn btn-ghost" id="recheckBtn" style="margin-left:.6rem">Re-check</button>
     <div class="bar"><div id="barFill"></div></div>
     <div class="count" id="count">Ready.</div>
@@ -228,6 +229,35 @@ async function importCovers(){
   btn.disabled = false;
 }
 document.getElementById("coversBtn").onclick = importCovers;
+
+/* ---- restore the ORIGINAL product prices from the website ---- */
+async function restorePrices(){
+  const btn = document.getElementById("restoreBtn"); btn.disabled = true;
+  doneEl.classList.remove("show"); logEl.innerHTML = "";
+  try{
+    log("Reading original prices from your website…");
+    const html = await (await fetch("/index.html", { cache:"no-store" })).text();
+    const IMG = new Function("return (" + extractAssignment(html, "IMG", "{", "}") + ")")();
+    const prods = new Function("IMG", "return (" + extractAssignment(html, "products", "[", "]") + ")")(IMG);
+    const { data: dbProds } = await sb.from("products").select("id,slug");
+    const bySlug = {}; (dbProds || []).forEach((p) => (bySlug[p.slug] = p.id));
+    let done = 0, updated = 0;
+    for(const p of prods){
+      done++; barFill.style.width = Math.round(done / prods.length * 100) + "%";
+      const id = bySlug[p.id];               // p.id is the original slug
+      if(!id) continue;
+      try{
+        await sb.from("products").update({ price: p.price || "", price_ar: p.price_ar || p.price || "" }).eq("id", id);
+        updated++; log(`✓ ${p.name} → ${p.price}`, "ok");
+      }catch(ex){ log(`✗ ${p.name} — ${ex.message}`, "err"); }
+    }
+    countEl.textContent = "Prices restored.";
+    doneEl.innerHTML = `<b>Restored ${updated} original prices.</b> Your website prices are back to normal.`;
+    doneEl.classList.add("show");
+  }catch(ex){ log("ERROR: " + ex.message, "err"); countEl.textContent = "Stopped."; }
+  btn.disabled = false;
+}
+document.getElementById("restoreBtn").onclick = restorePrices;
 
 document.getElementById("runBtn").onclick = runImport;
 document.getElementById("recheckBtn").onclick = async () => {
