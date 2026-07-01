@@ -43,6 +43,7 @@ a.back{color:var(--gold-deep);font-size:.8rem;text-decoration:none}
 
   <div class="card">
     <button class="btn" id="runBtn">Import products from website</button>
+    <button class="btn" id="coversBtn" style="margin-left:.6rem">Import collection covers</button>
     <button class="btn btn-ghost" id="recheckBtn" style="margin-left:.6rem">Re-check</button>
     <div class="bar"><div id="barFill"></div></div>
     <div class="count" id="count">Ready.</div>
@@ -198,6 +199,36 @@ async function runImport(){
   document.getElementById("runBtn").disabled = false;
   running = false;
 }
+/* ---- import the ORIGINAL collection covers from the website ---- */
+async function importCovers(){
+  const btn = document.getElementById("coversBtn"); btn.disabled = true;
+  doneEl.classList.remove("show"); logEl.innerHTML = "";
+  try{
+    log("Reading collection covers from your website…");
+    const html = await (await fetch("/index.html", { cache:"no-store" })).text();
+    const IMG = new Function("return (" + extractAssignment(html, "IMG", "{", "}") + ")")();
+    const cols = new Function("IMG", "return (" + extractAssignment(html, "collections", "[", "]") + ")")(IMG);
+    const { data: dbCols } = await sb.from("collections").select("id,key");
+    const byKey = {}; (dbCols || []).forEach((c) => (byKey[c.key] = c.id));
+    let done = 0;
+    for(const c of cols){
+      done++; barFill.style.width = Math.round(done / cols.length * 100) + "%";
+      if(!c.img || typeof c.img !== "string" || !c.img.startsWith("data:")){ log(`• ${c.key} — no cover, skipped`, "skip"); continue; }
+      if(!byKey[c.key]){ log(`• ${c.key} — not in database, skipped`, "skip"); continue; }
+      try{
+        const url = await uploadDataURI(c.img, "collections");
+        await sb.from("collections").update({ img: url }).eq("id", byKey[c.key]);
+        log(`✓ ${c.title || c.key} — cover set`, "ok");
+      }catch(ex){ log(`✗ ${c.key} — ${ex.message}`, "err"); }
+    }
+    countEl.textContent = "Covers done.";
+    doneEl.innerHTML = "<b>Collection covers imported.</b> Open the <a href='/admin/dashboard.html'>dashboard</a> — the covers now match your website.";
+    doneEl.classList.add("show");
+  }catch(ex){ log("ERROR: " + ex.message, "err"); countEl.textContent = "Stopped."; }
+  btn.disabled = false;
+}
+document.getElementById("coversBtn").onclick = importCovers;
+
 document.getElementById("runBtn").onclick = runImport;
 document.getElementById("recheckBtn").onclick = async () => {
   const { count } = await sb.from("products").select("*", { count:"exact", head:true });
