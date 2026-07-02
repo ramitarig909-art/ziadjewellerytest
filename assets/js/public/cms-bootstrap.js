@@ -4,9 +4,9 @@
     const st = document.createElement("style");
     st.textContent =
       "@media(max-width:760px){#collectionPage.active .back-link{" +
-      "position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:1500;margin:0;" +
-      "background:#14110c;color:#c8a24a;border:1px solid rgba(200,162,71,.6);padding:.7rem 1.4rem;" +
-      "border-radius:40px;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:.82rem;white-space:nowrap}}" +
+      "position:sticky;top:58px;z-index:900;display:inline-block;margin:0 0 .8rem;" +
+      "background:#14110c;color:#c8a24a;border:1px solid rgba(200,162,71,.6);padding:.55rem 1.1rem;" +
+      "border-radius:40px;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:.8rem;white-space:nowrap}}" +
       ".prod-thumb{position:relative}" +
       ".prod-thumb img{object-fit:cover!important}" +
       ".oos-badge{position:absolute;top:10px;right:10px;z-index:4;background:#a8442e;color:#fff;" +
