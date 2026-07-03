@@ -1272,7 +1272,7 @@ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function makeSparks(){
   const box=document.getElementById('preSparks'); if(!box||reduce)return;
   let html='';
-  for(let i=0;i<46;i++){
+  for(let i=0;i<18;i++){
     const sz=(4+Math.random()*13).toFixed(1);
     const dx=((Math.random()-0.5)*120).toFixed(0);
     const dy=(-40-Math.random()*100).toFixed(0);
@@ -1281,7 +1281,7 @@ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   box.innerHTML=html;
 })();
 function endIntro(){preloader.classList.add('done');document.body.classList.remove('locked');bindReveal();handleHash();setTimeout(()=>{preloader.style.display='none';},950);}
-window.addEventListener('load',()=>{setTimeout(endIntro,reduce?200:2600);});
+window.addEventListener('load',()=>{setTimeout(endIntro,reduce?200:1400);});
 setTimeout(()=>{if(!preloader.classList.contains('done'))endIntro();},4500);
 
 ;document.addEventListener('keydown',function(e){if(e.key==='Escape'&&typeof closeWaChoice==='function')closeWaChoice();});
