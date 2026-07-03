@@ -205,6 +205,8 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
     <div class="field-row"><div class="field"><label data-i18n="name_en">Name (English)</label><input id="fName" required /></div><div class="field"><label data-i18n="name_ar">Name (Arabic)</label><input id="fNameAr" dir="rtl" /></div></div>
     <div class="field-row"><div class="field"><label data-i18n="collection">Collection</label><select id="fCol"></select></div><div class="field"><label data-i18n="price">Price (EGP)</label><input id="fPrice" placeholder="46,000" /></div></div>
     <div class="field-row"><div class="field"><label data-i18n="weight">Weight</label><input id="fWeight" placeholder="4.51 g" /></div><div class="field"><label data-i18n="metal">Metal</label><input id="fMetal" placeholder="18k Yellow Gold" /></div></div>
+    <div class="field"><label data-i18n="desc_en">Description / Notes (English)</label><textarea id="fDesc" rows="3"></textarea></div>
+    <div class="field"><label data-i18n="desc_ar">Description / Notes (Arabic)</label><textarea id="fDescAr" dir="rtl" rows="3"></textarea></div>
     <div class="toggle-line"><input type="checkbox" id="fFeatured" /><label for="fFeatured" data-i18n="bestseller_toggle">Show in Best Sellers section</label></div>
     <div class="toggle-line"><input type="checkbox" id="fNew" /><label for="fNew" data-i18n="new_toggle">Show "New" tag</label></div>
     <div class="toggle-line"><input type="checkbox" id="fStock" checked /><label for="fStock" data-i18n="stock_toggle">In stock (visible on site)</label></div>
@@ -283,7 +285,7 @@ const I18N={
   empty_products:'No products yet. Click "+ Add Product".',no_match:"No products match your search.",
   add_product_title:"Add Product",edit_product_title:"Edit Product",product_modal_sub:"This appears on your website as soon as you save.",
   photos_label:"Photos — first photo is the main one",upload_hint:"Click to choose photos, or drag them here",uploading:"Uploading…",
-  name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",
+  name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",desc_en:"Description / Notes (English)",desc_ar:"Description / Notes (Arabic)",
   bestseller_toggle:"Show in Best Sellers section on homepage",new_toggle:'Show "New" tag',stock_toggle:"In stock (visible on site)",
   cancel:"Cancel",save_product:"Save Product",saving:"Saving…",confirm_delete:'Remove "{name}" from the website? This cannot be undone.',
   col_title:"Collections",col_sub:"The categories visitors browse on the homepage",th_tagline:"Tagline",th_products_count:"Products",
@@ -306,7 +308,7 @@ const I18N={
   empty_products:'لا توجد منتجات بعد. اضغط "إضافة منتج".',no_match:"لا توجد منتجات مطابقة لبحثك.",
   add_product_title:"إضافة منتج",edit_product_title:"تعديل المنتج",product_modal_sub:"يظهر على موقعك فور الحفظ.",
   photos_label:"الصور — الصورة الأولى هي الرئيسية",upload_hint:"اضغط لاختيار الصور، أو اسحبها هنا",uploading:"جاري الرفع…",
-  name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",
+  name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",desc_en:"الوصف / ملاحظات (إنجليزي)",desc_ar:"الوصف / ملاحظات (عربي)",
   bestseller_toggle:"عرضه في قسم الأكثر مبيعاً بالصفحة الرئيسية",new_toggle:'إظهار علامة "جديد"',stock_toggle:"متوفّر (ظاهر على الموقع)",
   cancel:"إلغاء",save_product:"حفظ المنتج",saving:"جاري الحفظ…",confirm_delete:'حذف "{name}" من الموقع؟ لا يمكن التراجع.',
   col_title:"المجموعات",col_sub:"الفئات التي يتصفّحها الزوار في الصفحة الرئيسية",th_tagline:"الوصف المختصر",th_products_count:"عدد المنتجات",
@@ -473,6 +475,7 @@ function openProductModal(p){
   $("productModalTitle").textContent=p?t("edit_product_title"):t("add_product_title");
   $("fName").value=p?.name||"";$("fNameAr").value=p?.name_ar||"";
   $("fPrice").value=(p?.price||"").replace(/^EGP\s*/i,"");$("fWeight").value=p?.weight||"";$("fMetal").value=p?.metal||"";
+  $("fDesc").value=p?.description||"";$("fDescAr").value=p?.description_ar||"";
   $("fFeatured").checked=!!p?.featured;$("fNew").checked=!!p?.new_arrival;
   $("fStock").checked=p?p.in_stock!==false:true;$("fOut").checked=p?p.in_stock===false:false;
   fillColSelect();$("fCol").value=p?.collection||(COLLECTIONS[0]&&COLLECTIONS[0].key)||"";
@@ -497,7 +500,7 @@ $("productForm").addEventListener("submit",async e=>{
   e.preventDefault();const name=$("fName").value.trim();if(!name)return toast(t("need_name"),true);
   const priceRaw=$("fPrice").value.trim().replace(/^EGP\s*/i,""),weight=$("fWeight").value.trim(),metal=$("fMetal").value.trim();
   const btn=$("saveProductBtn");btn.disabled=true;btn.textContent=t("saving");
-  const row={name,name_ar:$("fNameAr").value.trim(),collection:$("fCol").value,cat:colLabel($("fCol").value),price:priceRaw?`EGP ${priceRaw}`:"",price_ar:priceRaw?`${priceRaw} ج.م`:"",weight,weight_ar:weight,metal,specs:metal?{Metal:metal}:{},featured:$("fFeatured").checked,new_arrival:$("fNew").checked,in_stock:!$("fOut").checked,main_image:photos[0]?.url||""};
+  const row={name,name_ar:$("fNameAr").value.trim(),collection:$("fCol").value,cat:colLabel($("fCol").value),price:priceRaw?`EGP ${priceRaw}`:"",price_ar:priceRaw?`${priceRaw} ج.م`:"",weight,weight_ar:weight,metal,specs:metal?{Metal:metal}:{},description:$("fDesc").value.trim(),description_ar:$("fDescAr").value.trim(),featured:$("fFeatured").checked,new_arrival:$("fNew").checked,in_stock:!$("fOut").checked,main_image:photos[0]?.url||""};
   try{
     let prod;
     if(editingId)prod=(await sb.from("products").update(row).eq("id",editingId).select().single()).data;
