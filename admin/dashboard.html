@@ -168,7 +168,7 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
 
     <section id="page-products" class="page" hidden>
       <div class="page-head"><div><h1 data-i18n="pr_title">Products</h1><p data-i18n="pr_sub">Add, edit or remove pieces shown on your website</p></div><button class="btn btn-gold" id="addProductBtn" data-i18n="add_product">+ Add Product</button></div>
-      <div class="table-toolbar"><input class="search" id="productSearch" data-i18n-ph="search_ph" placeholder="Search products…" /><button class="btn btn-ghost" id="calcBtn" data-i18n="calc_btn">Price Calculator</button></div>
+      <div class="table-toolbar"><input class="search" id="productSearch" data-i18n-ph="search_ph" placeholder="Search products…" /><button class="btn btn-ghost" id="calcBtn" data-i18n="calc_btn">Price Calculator</button><button class="btn btn-ghost" id="calcGoldBtn" data-i18n="calc_gold_btn">Gold Price</button><button class="btn btn-ghost" id="calcMakingBtn" data-i18n="calc_making_btn">Making Charges</button></div>
       <div class="card" style="padding:0"><div class="table-scroll"><table><thead><tr><th></th><th data-i18n="th_name">Name</th><th data-i18n="th_collection">Collection</th><th data-i18n="th_price">Price</th><th data-i18n="th_status">Status</th><th></th></tr></thead><tbody id="productsBody"><tr><td colspan="6" class="loading">…</td></tr></tbody></table></div></div>
     </section>
 
@@ -241,13 +241,14 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
 
 <!-- Price calculator modal -->
 <div class="overlay" id="calcOverlay"><div class="modal">
-  <h2 data-i18n="calc_title">Bulk Price Calculator</h2>
+  <h2 id="calcTitle" data-i18n="calc_title">Bulk Price Calculator</h2>
   <div class="sub" data-i18n="calc_sub">New price = (gold price per gram + making charges per gram) × product weight.</div>
   <form id="calcForm" onsubmit="return false">
     <div class="field-row">
-      <div class="field"><label data-i18n="calc_gold">Gold price per gram (EGP)</label><input id="calcGold" type="number" inputmode="decimal" placeholder="0" /></div>
-      <div class="field"><label data-i18n="calc_making">Making charges per gram — مصنعية (EGP)</label><input id="calcMaking" type="number" inputmode="decimal" placeholder="0" /></div>
+      <div class="field" id="calcGoldWrap"><label data-i18n="calc_gold">Gold price per gram (EGP)</label><input id="calcGold" type="number" inputmode="decimal" placeholder="0" /></div>
+      <div class="field" id="calcMakingWrap"><label data-i18n="calc_making">Making charges per gram — مصنعية (EGP)</label><input id="calcMaking" type="number" inputmode="decimal" placeholder="0" /></div>
     </div>
+    <div id="calcKept" class="field-hint" style="margin:-.3rem 0 .7rem;color:var(--gold-deep);font-weight:500"></div>
     <div class="field"><label data-i18n="calc_scope">Apply to</label>
       <select id="calcScope"><option value="all" data-i18n="calc_all">All products</option><option value="col" data-i18n="calc_by_col">A collection</option><option value="name" data-i18n="calc_by_name">A brand / name</option><option value="specific" data-i18n="calc_specific">Specific products</option></select></div>
     <div class="field" id="calcColWrap" hidden><label data-i18n="calc_pick_col">Choose collection</label><select id="calcCol"></select></div>
@@ -269,6 +270,7 @@ const cfg = window.ZIAD_SUPABASE || {};
 const sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
 const BUCKET = "product-images";
 let PRODUCTS=[], COLLECTIONS=[], REVIEWS=[], CONTENT={}, CONTACT={}, SITE_T=null;
+let PRICING={gold:0,making:0}, calcMode="both";
 let LANG = localStorage.getItem("ziad_admin_lang") || "en";
 
 /* ---------- translations ---------- */
@@ -295,7 +297,7 @@ const I18N={
   need_name:"Please enter a name",main_tag:"MAIN",
   st_collections:"Collections",st_out:"Out of Stock",tag_out:"Out of Stock",outstock_toggle:"Out of stock (hides it from the site)",
   add_collection:"+ Add Collection",add_collection_title:"Add Collection",col_cover:"Cover image",upload_cover:"Click to upload a cover image",col_key:"Key (used in links, e.g. rings)",col_order:"Display order",
-  calc_btn:"Price Calculator",calc_title:"Bulk Price Calculator",calc_sub:"New price = (gold price per gram + making charges per gram) × product weight.",calc_gold:"Gold price per gram (EGP)",calc_making:"Making charges per gram — مصنعية (EGP)",calc_scope:"Apply to",calc_all:"All products",calc_by_col:"A collection",calc_by_name:"A brand / name",calc_specific:"Specific products",calc_pick_col:"Choose collection",calc_pick_name:"Choose name",calc_pick_products:"Choose products",calc_apply:"Apply to prices",calc_affected:"{n} products will be updated",calc_noweight:"{n} skipped (no weight)",calc_enter_prices:"Enter gold price and/or making charges above.",calc_done:"Prices updated — live on the site",calc_confirm:"Update {n} product prices? This replaces their current prices.",no_weight:"no weight"},
+  calc_btn:"Price Calculator",calc_title:"Bulk Price Calculator",calc_sub:"New price = (gold price per gram + making charges per gram) × product weight.",calc_gold:"Gold price per gram (EGP)",calc_making:"Making charges per gram — مصنعية (EGP)",calc_scope:"Apply to",calc_all:"All products",calc_by_col:"A collection",calc_by_name:"A brand / name",calc_specific:"Specific products",calc_pick_col:"Choose collection",calc_pick_name:"Choose name",calc_pick_products:"Choose products",calc_gold_btn:"Gold Price",calc_making_btn:"Making Charges",calc_title_gold:"Update Gold Price",calc_title_making:"Update Making Charges",calc_kept_making:"Making charges kept at {v} EGP/g (not changed)",calc_kept_gold:"Gold price kept at {v} EGP/g (not changed)",calc_apply:"Apply to prices",calc_affected:"{n} products will be updated",calc_noweight:"{n} skipped (no weight)",calc_enter_prices:"Enter gold price and/or making charges above.",calc_done:"Prices updated — live on the site",calc_confirm:"Update {n} product prices? This replaces their current prices.",no_weight:"no weight"},
  ar:{owner_dashboard:"لوحة التحكم",nav_overview:"نظرة عامة",nav_products:"المنتجات",nav_collections:"المجموعات",nav_reviews:"الآراء",nav_homepage:"نصوص الصفحة الرئيسية",nav_settings:"التواصل والإعدادات",view_site:"↗ عرض الموقع",sign_out:"تسجيل الخروج",lang_btn:"English",
   ov_title:"نظرة عامة",ov_sub:"نظرة سريعة على ما هو منشور على موقعك",st_products:"المنتجات",st_bestsellers:"الأكثر مبيعاً",st_new:"وصل حديثاً",st_reviews:"الآراء",
   recent:"آخر التحديثات",th_product:"المنتج",th_collection:"المجموعة",th_price:"السعر",
@@ -318,7 +320,7 @@ const I18N={
   need_name:"الرجاء إدخال الاسم",main_tag:"رئيسية",
   st_collections:"المجموعات",st_out:"غير متوفّر",tag_out:"غير متوفّر",outstock_toggle:"غير متوفّر (يُخفيه من الموقع)",
   add_collection:"+ إضافة مجموعة",add_collection_title:"إضافة مجموعة",col_cover:"صورة الغلاف",upload_cover:"اضغط لرفع صورة الغلاف",col_key:"المفتاح (يُستخدم في الروابط، مثال rings)",col_order:"ترتيب العرض",
-  calc_btn:"حاسبة الأسعار",calc_title:"حاسبة الأسعار بالجملة",calc_sub:"السعر الجديد = (سعر جرام الذهب + المصنعية لكل جرام) × وزن المنتج.",calc_gold:"سعر جرام الذهب (ج.م)",calc_making:"المصنعية لكل جرام (ج.م)",calc_scope:"تطبيق على",calc_all:"كل المنتجات",calc_by_col:"مجموعة محددة",calc_by_name:"ماركة / اسم",calc_specific:"منتجات محددة",calc_pick_col:"اختر المجموعة",calc_pick_name:"اختر الاسم",calc_pick_products:"اختر المنتجات",calc_apply:"تطبيق على الأسعار",calc_affected:"سيتم تحديث {n} منتج",calc_noweight:"{n} بدون وزن (تم تخطيها)",calc_enter_prices:"أدخل سعر الذهب و/أو المصنعية بالأعلى.",calc_done:"تم تحديث الأسعار — منشور على الموقع",calc_confirm:"تحديث أسعار {n} منتج؟ سيتم استبدال أسعارها الحالية.",no_weight:"بدون وزن"}
+  calc_btn:"حاسبة الأسعار",calc_title:"حاسبة الأسعار بالجملة",calc_sub:"السعر الجديد = (سعر جرام الذهب + المصنعية لكل جرام) × وزن المنتج.",calc_gold:"سعر جرام الذهب (ج.م)",calc_making:"المصنعية لكل جرام (ج.م)",calc_scope:"تطبيق على",calc_all:"كل المنتجات",calc_by_col:"مجموعة محددة",calc_by_name:"ماركة / اسم",calc_specific:"منتجات محددة",calc_pick_col:"اختر المجموعة",calc_pick_name:"اختر الاسم",calc_pick_products:"اختر المنتجات",calc_gold_btn:"سعر الذهب",calc_making_btn:"المصنعية",calc_title_gold:"تحديث سعر الذهب",calc_title_making:"تحديث المصنعية",calc_kept_making:"المصنعية ثابتة على {v} ج.م/جم (لم تتغيّر)",calc_kept_gold:"سعر الذهب ثابت على {v} ج.م/جم (لم يتغيّر)",calc_apply:"تطبيق على الأسعار",calc_affected:"سيتم تحديث {n} منتج",calc_noweight:"{n} بدون وزن (تم تخطيها)",calc_enter_prices:"أدخل سعر الذهب و/أو المصنعية بالأعلى.",calc_done:"تم تحديث الأسعار — منشور على الموقع",calc_confirm:"تحديث أسعار {n} منتج؟ سيتم استبدال أسعارها الحالية.",no_weight:"بدون وزن"}
 };
 function t(key,vars){ let s=(I18N[LANG]&&I18N[LANG][key])||I18N.en[key]||key; if(vars)Object.keys(vars).forEach(k=>s=s.replace("{"+k+"}",vars[k])); return s; }
 
@@ -411,17 +413,19 @@ async function uploadPhoto(file){const blob=await compress(file);const path=`pro
 
 /* ---------- load ---------- */
 async function loadAll(){
-  const [p,c,rev,content,contact]=await Promise.all([
+  const [p,c,rev,content,contact,pricing]=await Promise.all([
     sb.from("products").select("*, product_images(*)").order("display_order",{ascending:true}).order("created_at",{ascending:false}),
     sb.from("collections").select("*").order("display_order",{ascending:true}),
     sb.from("reviews").select("*").order("display_order",{ascending:true}),
     sb.from("content").select("*"),
-    sb.from("settings").select("value").eq("key","contact").maybeSingle()
+    sb.from("settings").select("value").eq("key","contact").maybeSingle(),
+    sb.from("settings").select("value").eq("key","pricing").maybeSingle()
   ]);
   if(p.error) throw p.error;
   PRODUCTS=p.data||[]; COLLECTIONS=c.data||[]; REVIEWS=rev.data||[];
   CONTENT={}; (content.data||[]).forEach(r=>CONTENT[r.key]=r);
   CONTACT=contact.data?.value||{};
+  PRICING={gold:0,making:0,...(pricing.data?.value||{})};
   renderAll();
 }
 function renderAll(){ fillColSelect(); renderOverview(); renderProducts($("productSearch").value); renderCollections(); renderReviews(); renderHomepage(); renderSettings(); }
@@ -525,8 +529,17 @@ function updateCalcPreview(){
   const sample=withW.slice(0,3).map(p=>`${esc(p.name)}: EGP ${fmtEGP((gold+making)*parseWeight(p.weight))}`).join("<br>");
   $("calcPreview").innerHTML=`<b>${t("calc_affected",{n:withW.length})}</b>`+(noW?` · ${t("calc_noweight",{n:noW})}`:"")+(sample?`<br><br>${sample}${withW.length>3?"<br>…":""}`:"");
 }
-function openCalc(){
-  $("calcGold").value="";$("calcMaking").value="";$("calcScope").value="all";
+function openCalc(mode){
+  calcMode=mode||"both";
+  // prefill BOTH fields with the remembered values, then hide the one we're not editing
+  $("calcGold").value=PRICING.gold||"";$("calcMaking").value=PRICING.making||"";
+  $("calcGoldWrap").hidden=(calcMode==="making");
+  $("calcMakingWrap").hidden=(calcMode==="gold");
+  $("calcTitle").textContent = calcMode==="gold"?t("calc_title_gold") : calcMode==="making"?t("calc_title_making") : t("calc_title");
+  $("calcKept").textContent =
+    calcMode==="gold"   ? t("calc_kept_making",{v:PRICING.making||0}) :
+    calcMode==="making" ? t("calc_kept_gold",{v:PRICING.gold||0}) : "";
+  $("calcScope").value="all";
   $("calcColWrap").hidden=true;$("calcNameWrap").hidden=true;$("calcProdWrap").hidden=true;
   $("calcCol").innerHTML=COLLECTIONS.map(c=>`<option value="${esc(c.key)}">${esc(c.title)}</option>`).join("");
   // distinct brand/names, with how many products share each
@@ -536,7 +549,9 @@ function openCalc(){
   $("calcProdList").innerHTML=PRODUCTS.map(p=>{const img=prodImg(p);return `<label style="display:flex;gap:.7rem;align-items:center;padding:.4rem 0;font-weight:400;border-bottom:1px solid var(--line-soft)"><input type="checkbox" class="calc-p" value="${p.id}" style="width:18px;height:18px;flex:none">${img?`<img class="calc-img" src="${esc(img)}" title="Click to zoom" style="width:56px;height:56px;object-fit:contain;background:var(--sand);border-radius:5px;flex:none;cursor:zoom-in">`:`<span style="width:56px;height:56px;background:var(--sand);border-radius:5px;flex:none;display:inline-block"></span>`}<span style="flex:1">${esc(LANG==="ar"&&p.name_ar?p.name_ar:p.name)} <span style="color:${parseWeight(p.weight)?'var(--muted)':'var(--warn)'};font-size:.82rem">(${parseWeight(p.weight)?esc(p.weight):t("no_weight")})</span></span></label>`;}).join("");
   updateCalcPreview();calcOverlay.classList.add("open");
 }
-$("calcBtn").onclick=openCalc;
+$("calcBtn").onclick=()=>openCalc("both");
+$("calcGoldBtn").onclick=()=>openCalc("gold");
+$("calcMakingBtn").onclick=()=>openCalc("making");
 $("cancelCalcBtn").onclick=()=>calcOverlay.classList.remove("open");
 calcOverlay.addEventListener("click",e=>{if(e.target===calcOverlay)calcOverlay.classList.remove("open");});
 $("calcScope").onchange=()=>{const v=$("calcScope").value;$("calcColWrap").hidden=v!=="col";$("calcNameWrap").hidden=v!=="name";$("calcProdWrap").hidden=v!=="specific";updateCalcPreview();};
@@ -553,6 +568,9 @@ $("applyCalcBtn").onclick=async()=>{
   if(!confirm(t("calc_confirm",{n:targets.length})))return;
   const btn=$("applyCalcBtn");btn.disabled=true;btn.textContent=t("saving");
   try{
+    // remember both values so gold & making can be updated independently next time
+    PRICING={gold,making};
+    await sb.from("settings").upsert({key:"pricing",value:PRICING});
     const results=await Promise.all(targets.map(p=>{const val=Math.round((gold+making)*parseWeight(p.weight));return sb.from("products").update({price:`EGP ${fmtEGP(val)}`,price_ar:`${fmtEGP(val)} ج.م`}).eq("id",p.id);}));
     const failed=results.filter(r=>r&&r.error).length;
     calcOverlay.classList.remove("open");await loadAll();
