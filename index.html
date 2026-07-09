@@ -1174,7 +1174,7 @@ function fillModal(p){
   const sp=LANG==='ar'?(p.specs_ar||{}):(p.specs||{});
   const weight=LANG==='ar'?(p.weight_ar||'عند الطلب'):(p.weight||'On request');
   let rows='';
-  if(p.items&&p.items.length){p.items.forEach(it=>{if(it.name||it.weight)rows+=`<div class="row"><span class="k">${it.name||''}</span><span class="v">${it.weight||''}</span></div>`;});}
+  if(p.items&&p.items.length){p.items.forEach(it=>{if(it.name||it.weight||it.price)rows+=`<div class="row"><span class="k">${it.name||''}</span><span class="v">${[it.weight,it.price].filter(Boolean).join(' · ')}</span></div>`;});}
   else{rows=`<div class="row"><span class="k">${T.spec_weight[LANG]}</span><span class="v">${weight}</span></div>`;}
   for(const k in sp){rows+=`<div class="row"><span class="k">${k}</span><span class="v">${sp[k]}</span></div>`;}
   specs.innerHTML=rows;
