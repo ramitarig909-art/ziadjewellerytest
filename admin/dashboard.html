@@ -207,6 +207,10 @@ html[dir="rtl"] .grp-title{font-family:'Cairo'}
     <div class="field-row"><div class="field"><label data-i18n="weight">Weight</label><input id="fWeight" placeholder="4.51 g" /></div><div class="field"><label data-i18n="metal">Metal</label><input id="fMetal" placeholder="18k Yellow Gold" /></div></div>
     <div class="field"><label data-i18n="desc_en">Description / Notes (English)</label><textarea id="fDesc" rows="3"></textarea></div>
     <div class="field"><label data-i18n="desc_ar">Description / Notes (Arabic)</label><textarea id="fDescAr" dir="rtl" rows="3"></textarea></div>
+    <div class="field"><label data-i18n="items_label">Multiple pieces (set / chain + pendant) — optional</label>
+      <div id="itemsList"></div>
+      <button type="button" class="btn btn-ghost" id="addItemBtn" style="min-height:0;padding:.5rem 1rem;font-size:.78rem" data-i18n="add_item">+ Add piece</button>
+      <div id="itemsTotal" class="field-hint" style="margin-top:.6rem;color:var(--gold-deep);font-weight:500"></div></div>
     <div class="toggle-line"><input type="checkbox" id="fFeatured" /><label for="fFeatured" data-i18n="bestseller_toggle">Show in Best Sellers section</label></div>
     <div class="toggle-line"><input type="checkbox" id="fNew" /><label for="fNew" data-i18n="new_toggle">Show "New" tag</label></div>
     <div class="toggle-line"><input type="checkbox" id="fStock" checked /><label for="fStock" data-i18n="stock_toggle">In stock (visible on site)</label></div>
@@ -285,7 +289,7 @@ const I18N={
   empty_products:'No products yet. Click "+ Add Product".',no_match:"No products match your search.",
   add_product_title:"Add Product",edit_product_title:"Edit Product",product_modal_sub:"This appears on your website as soon as you save.",
   photos_label:"Photos — first photo is the main one",upload_hint:"Click to choose photos, or drag them here",uploading:"Uploading…",
-  name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",desc_en:"Description / Notes (English)",desc_ar:"Description / Notes (Arabic)",
+  name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",desc_en:"Description / Notes (English)",desc_ar:"Description / Notes (Arabic)",items_label:"Multiple pieces (set / chain + pendant) — optional. Each piece is priced by its own weight.",add_item:"+ Add piece",item_name_ph:"Piece (Chain, Pendant…)",item_weight_ph:"Weight g",item_price_ph:"Fixed price (optional)",items_total:"Total: {w} g · EGP {p} (from the pieces)",
   bestseller_toggle:"Show in Best Sellers section on homepage",new_toggle:'Show "New" tag',stock_toggle:"In stock (visible on site)",
   cancel:"Cancel",save_product:"Save Product",saving:"Saving…",confirm_delete:'Remove "{name}" from the website? This cannot be undone.',
   col_title:"Collections",col_sub:"The categories visitors browse on the homepage",th_tagline:"Tagline",th_products_count:"Products",
@@ -308,7 +312,7 @@ const I18N={
   empty_products:'لا توجد منتجات بعد. اضغط "إضافة منتج".',no_match:"لا توجد منتجات مطابقة لبحثك.",
   add_product_title:"إضافة منتج",edit_product_title:"تعديل المنتج",product_modal_sub:"يظهر على موقعك فور الحفظ.",
   photos_label:"الصور — الصورة الأولى هي الرئيسية",upload_hint:"اضغط لاختيار الصور، أو اسحبها هنا",uploading:"جاري الرفع…",
-  name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",desc_en:"الوصف / ملاحظات (إنجليزي)",desc_ar:"الوصف / ملاحظات (عربي)",
+  name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",desc_en:"الوصف / ملاحظات (إنجليزي)",desc_ar:"الوصف / ملاحظات (عربي)",items_label:"عدة قطع (طقم / سلسلة + دلاية) — اختياري. كل قطعة تُحسب بوزنها.",add_item:"+ إضافة قطعة",item_name_ph:"القطعة (سلسلة، دلاية…)",item_weight_ph:"الوزن جم",item_price_ph:"سعر ثابت (اختياري)",items_total:"الإجمالي: {w} جم · {p} ج.م (من القطع)",
   bestseller_toggle:"عرضه في قسم الأكثر مبيعاً بالصفحة الرئيسية",new_toggle:'إظهار علامة "جديد"',stock_toggle:"متوفّر (ظاهر على الموقع)",
   cancel:"إلغاء",save_product:"حفظ المنتج",saving:"جاري الحفظ…",confirm_delete:'حذف "{name}" من الموقع؟ لا يمكن التراجع.',
   col_title:"المجموعات",col_sub:"الفئات التي يتصفّحها الزوار في الصفحة الرئيسية",th_tagline:"الوصف المختصر",th_products_count:"عدد المنتجات",
@@ -467,7 +471,26 @@ $("productsBody").addEventListener("click",async e=>{
   }
 });
 
-const productOverlay=$("productOverlay");let editingId=null,photos=[];
+const productOverlay=$("productOverlay");let editingId=null,photos=[],editorItems=[];
+/* ---- multi-piece (sets) editor ---- */
+function renderItems(){
+  $("itemsList").innerHTML=editorItems.map((it,i)=>`<div style="display:flex;gap:.45rem;margin-bottom:.45rem;align-items:center">
+    <input class="it-name" data-i="${i}" placeholder="${t('item_name_ph')}" value="${esc(it.name||'')}" style="flex:1.3">
+    <input class="it-weight" data-i="${i}" placeholder="${t('item_weight_ph')}" value="${esc(it.weight||'')}" style="flex:.9">
+    <input class="it-price" data-i="${i}" placeholder="${t('item_price_ph')}" value="${esc(it.price||'')}" style="flex:1">
+    <button type="button" class="icon-btn danger it-del" data-i="${i}" style="flex:none;width:38px">✕</button></div>`).join("");
+  $("itemsList").querySelectorAll(".it-name").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].name=el.value;});
+  $("itemsList").querySelectorAll(".it-weight").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].weight=el.value;updateItemsTotal();});
+  $("itemsList").querySelectorAll(".it-price").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].price=el.value;updateItemsTotal();});
+  $("itemsList").querySelectorAll(".it-del").forEach(el=>el.onclick=()=>{editorItems.splice(+el.dataset.i,1);renderItems();});
+  updateItemsTotal();
+}
+function updateItemsTotal(){
+  if(!editorItems.length){$("itemsTotal").textContent="";return;}
+  const g=PRICING.gold||0,m=PRICING.making||0;
+  $("itemsTotal").textContent=t("items_total",{w:itemsWeight(editorItems),p:fmtEGP(itemsTotal(editorItems,g,m))});
+}
+$("addItemBtn").onclick=()=>{editorItems.push({name:"",weight:"",price:""});renderItems();};
 function fillColSelect(){$("fCol").innerHTML=COLLECTIONS.map(c=>`<option value="${esc(c.key)}">${esc(c.title)}</option>`).join("");}
 function drawPreviews(){$("uploadPreview").innerHTML=photos.map((ph,i)=>`<div class="ph"><img src="${esc(ph.url)}">${i===0?`<span class="main">${t("main_tag")}</span>`:""}<span class="x" data-rm="${i}">✕</span></div>`).join("");$("uploadPreview").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.rm,1);drawPreviews();});}
 function openProductModal(p){
@@ -481,6 +504,7 @@ function openProductModal(p){
   fillColSelect();$("fCol").value=p?.collection||(COLLECTIONS[0]&&COLLECTIONS[0].key)||"";
   photos=[];
   if(p){const imgs=(p.product_images||[]).slice().sort((a,b)=>(b.is_main-a.is_main)||(a.display_order-b.display_order));if(p.main_image)photos.push({url:p.main_image});imgs.forEach(i=>{if(i.url&&!photos.some(x=>x.url===i.url))photos.push({url:i.url});});}
+  editorItems=(p&&Array.isArray(p.items))?p.items.map(x=>({...x})):[];renderItems();
   drawPreviews();productOverlay.classList.add("open");
 }
 function closeProductModal(){productOverlay.classList.remove("open");}
@@ -498,9 +522,18 @@ $("uploadBox").addEventListener("drop",e=>{e.preventDefault();handleFiles([...e.
 async function handleFiles(files){for(const file of files){if(!file.type.startsWith("image/"))continue;$("uploadBox").textContent=t("uploading");try{const url=await uploadPhoto(file);photos.push({url});drawPreviews();toast(t("t_uploaded"));}catch(ex){toast(ex.message,true);}}$("uploadBox").textContent=t("upload_hint");$("fileInput").value="";}
 $("productForm").addEventListener("submit",async e=>{
   e.preventDefault();const name=$("fName").value.trim();if(!name)return toast(t("need_name"),true);
-  const priceRaw=$("fPrice").value.trim().replace(/^EGP\s*/i,""),weight=$("fWeight").value.trim(),metal=$("fMetal").value.trim();
+  const metal=$("fMetal").value.trim();
+  // multi-piece products (sets): totals come from the pieces; otherwise use the single fields
+  const items=editorItems.filter(it=>(it.name||"").trim()||parseWeight(it.weight)>0||String(it.price||"").trim());
+  let weight,weightAr,priceRaw;
+  if(items.length){
+    const g=PRICING.gold||0,m=PRICING.making||0,w=itemsWeight(items),tot=itemsTotal(items,g,m);
+    weight=w?`${w} g`:"";weightAr=w?`${w} جم`:"";priceRaw=tot?fmtEGP(tot):"";
+  }else{
+    weight=$("fWeight").value.trim();weightAr=weight;priceRaw=$("fPrice").value.trim().replace(/^EGP\s*/i,"");
+  }
   const btn=$("saveProductBtn");btn.disabled=true;btn.textContent=t("saving");
-  const row={name,name_ar:$("fNameAr").value.trim(),collection:$("fCol").value,cat:colLabel($("fCol").value),price:priceRaw?`EGP ${priceRaw}`:"",price_ar:priceRaw?`${priceRaw} ج.م`:"",weight,weight_ar:weight,metal,specs:metal?{Metal:metal}:{},description:$("fDesc").value.trim(),description_ar:$("fDescAr").value.trim(),featured:$("fFeatured").checked,new_arrival:$("fNew").checked,in_stock:!$("fOut").checked,main_image:photos[0]?.url||""};
+  const row={name,name_ar:$("fNameAr").value.trim(),collection:$("fCol").value,cat:colLabel($("fCol").value),price:priceRaw?`EGP ${priceRaw}`:"",price_ar:priceRaw?`${priceRaw} ج.م`:"",weight,weight_ar:weightAr,metal,specs:metal?{Metal:metal}:{},items,description:$("fDesc").value.trim(),description_ar:$("fDescAr").value.trim(),featured:$("fFeatured").checked,new_arrival:$("fNew").checked,in_stock:!$("fOut").checked,main_image:photos[0]?.url||""};
   try{
     let prod;
     if(editingId)prod=(await sb.from("products").update(row).eq("id",editingId).select().single()).data;
@@ -515,7 +548,14 @@ $("productForm").addEventListener("submit",async e=>{
 /* ---------- price calculator ---------- */
 const calcOverlay=$("calcOverlay");
 const parseWeight=(w)=>{const m=String(w||"").match(/[\d.]+/);return m?parseFloat(m[0]):0;};
+const parseMoney=(v)=>parseFloat(String(v||"").replace(/[^\d.]/g,""))||0;
 const fmtEGP=(n)=>Math.round(n).toLocaleString("en-US");
+/* multi-piece (sets) helpers: each piece priced by its own weight, or a fixed price */
+const itemsWeight=(items)=>{let w=0;(items||[]).forEach(it=>w+=parseWeight(it.weight));return Math.round(w*100)/100;};
+const itemPrice=(it,gold,making)=>{const fp=parseMoney(it.price);return fp>0?fp:(gold+making)*parseWeight(it.weight);};
+const itemsTotal=(items,gold,making)=>{let s=0;(items||[]).forEach(it=>s+=itemPrice(it,gold,making));return Math.round(s);};
+const productCalcPrice=(p,gold,making)=>(p.items&&p.items.length)?itemsTotal(p.items,gold,making):Math.round((gold+making)*parseWeight(p.weight));
+const productHasWeight=(p)=>(p.items&&p.items.length&&p.items.some(it=>parseWeight(it.weight)>0||parseMoney(it.price)>0))||parseWeight(p.weight)>0;
 function calcTargets(){
   const s=$("calcScope").value;
   if(s==="all")return PRODUCTS.slice();
@@ -527,9 +567,9 @@ function calcTargets(){
 const prodImg=(p)=>p.main_image||(p.product_images&&p.product_images[0]&&p.product_images[0].url)||"";
 function updateCalcPreview(){
   const gold=parseFloat($("calcGold").value)||0,making=parseFloat($("calcMaking").value)||0;
-  const targets=calcTargets(),withW=targets.filter(p=>parseWeight(p.weight)>0),noW=targets.length-withW.length;
+  const targets=calcTargets(),withW=targets.filter(productHasWeight),noW=targets.length-withW.length;
   if(!gold&&!making){$("calcPreview").innerHTML=`<span>${t("calc_enter_prices")}</span>`;return;}
-  const sample=withW.slice(0,3).map(p=>`${esc(p.name)}: EGP ${fmtEGP((gold+making)*parseWeight(p.weight))}`).join("<br>");
+  const sample=withW.slice(0,3).map(p=>`${esc(p.name)}: EGP ${fmtEGP(productCalcPrice(p,gold,making))}`).join("<br>");
   $("calcPreview").innerHTML=`<b>${t("calc_affected",{n:withW.length})}</b>`+(noW?` · ${t("calc_noweight",{n:noW})}`:"")+(sample?`<br><br>${sample}${withW.length>3?"<br>…":""}`:"");
 }
 function openCalc(mode){
@@ -566,7 +606,7 @@ $("calcProdList").addEventListener("click",e=>{ if(e.target.classList.contains("
 $("applyCalcBtn").onclick=async()=>{
   const gold=parseFloat($("calcGold").value)||0,making=parseFloat($("calcMaking").value)||0;
   if(!gold&&!making)return toast(t("calc_enter_prices"),true);
-  const targets=calcTargets().filter(p=>parseWeight(p.weight)>0);
+  const targets=calcTargets().filter(productHasWeight);
   if(!targets.length)return toast(t("calc_affected",{n:0}),true);
   if(!confirm(t("calc_confirm",{n:targets.length})))return;
   const btn=$("applyCalcBtn");btn.disabled=true;btn.textContent=t("saving");
@@ -574,7 +614,7 @@ $("applyCalcBtn").onclick=async()=>{
     // remember both values so gold & making can be updated independently next time
     PRICING={gold,making};
     await sb.from("settings").upsert({key:"pricing",value:PRICING});
-    const results=await Promise.all(targets.map(p=>{const val=Math.round((gold+making)*parseWeight(p.weight));return sb.from("products").update({price:`EGP ${fmtEGP(val)}`,price_ar:`${fmtEGP(val)} ج.م`}).eq("id",p.id);}));
+    const results=await Promise.all(targets.map(p=>{const val=productCalcPrice(p,gold,making);return sb.from("products").update({price:`EGP ${fmtEGP(val)}`,price_ar:`${fmtEGP(val)} ج.م`}).eq("id",p.id);}));
     const failed=results.filter(r=>r&&r.error).length;
     calcOverlay.classList.remove("open");await loadAll();
     toast(failed?`${failed} ${LANG==="ar"?"فشل":"failed"}`:t("calc_done"),!!failed);
