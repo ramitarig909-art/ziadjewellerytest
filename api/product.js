@@ -1,4 +1,8 @@
-/* /product/<slug> — individual product page (Vercel serverless). READ-ONLY. */
+/* =====================================================================
+ *  /product/<slug>  — individual product page (Vercel serverless).
+ *  READ-ONLY: fetches the product from Supabase and renders an SEO-ready
+ *  page. Does not touch index.html, the dashboard, or any data.
+ * ===================================================================== */
 const SUPABASE_URL = "https://mwpkmzsryrywldkzuacs.supabase.co";
 const ANON = "sb_publishable_MIpqtLl-tVXX6Lgquq0p5Q_gdo32rKJ";
 const SITE = "https://ziadjewellery.com";
@@ -85,7 +89,7 @@ module.exports = async (req, res) => {
           ${p.weight ? `<div><span>Weight</span> ${esc(p.weight)}</div>` : ""}
           ${p.metal ? `<div><span>Metal</span> ${esc(p.metal)}</div>` : ""}
         </div>
-        ${(Array.isArray(p.items) && p.items.length) ? `<div class="pieces"><span class="pieces-lbl">This set includes</span>${p.items.map((it) => `<div class="piece">${esc(it.name || "Piece")}${it.weight ? ` — ${esc(it.weight)}` : ""}${it.price ? ` — ${esc(it.price)}` : ""}</div>`).join("")}</div>` : ""}
+        ${(Array.isArray(p.items) && p.items.length) ? `<div class="pieces"><span class="pieces-lbl">This set includes</span>${p.items.map((it) => `<div class="piece">${esc([it.brand, it.name].filter(Boolean).join(" ") || "Piece")}${it.weight ? ` — ${esc(it.weight)}` : ""}${it.price ? ` — ${esc(it.price)}` : ""}</div>`).join("")}</div>` : ""}
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         ${p.description_ar ? `<p class="desc" dir="rtl">${esc(p.description_ar)}</p>` : ""}
         <a class="wa" href="https://wa.me/${esc(wa)}?text=${waMsg}" target="_blank" rel="noopener">

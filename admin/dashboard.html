@@ -289,7 +289,7 @@ const I18N={
   empty_products:'No products yet. Click "+ Add Product".',no_match:"No products match your search.",
   add_product_title:"Add Product",edit_product_title:"Edit Product",product_modal_sub:"This appears on your website as soon as you save.",
   photos_label:"Photos — first photo is the main one",upload_hint:"Click to choose photos, or drag them here",uploading:"Uploading…",
-  name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",desc_en:"Description / Notes (English)",desc_ar:"Description / Notes (Arabic)",items_label:"Multiple pieces (set / chain + pendant) — optional. Each piece is priced by its own weight.",add_item:"+ Add piece",item_brand_ph:"Brand name (e.g. Italian Gold)",item_weight_ph:"Weight g",item_making_ph:"Making/g",item_price_ph:"Price",items_total:"Total: {w} g · EGP {p} (from the pieces)",
+  name_en:"Name (English)",name_ar:"Name (Arabic)",collection:"Collection",price:"Price (EGP)",weight:"Weight",metal:"Metal",desc_en:"Description / Notes (English)",desc_ar:"Description / Notes (Arabic)",items_label:"Multiple pieces (set / chain + pendant) — optional. Each piece is priced by its own weight.",add_item:"+ Add piece",item_type_ph:"Type (Chain, Pendant…)",item_brand_ph:"Brand name (e.g. Italian Gold)",item_weight_ph:"Weight g",item_making_ph:"Making/g",item_price_ph:"Price",items_total:"Total: {w} g · EGP {p} (from the pieces)",
   bestseller_toggle:"Show in Best Sellers section on homepage",new_toggle:'Show "New" tag',stock_toggle:"In stock (visible on site)",
   cancel:"Cancel",save_product:"Save Product",saving:"Saving…",confirm_delete:'Remove "{name}" from the website? This cannot be undone.',
   col_title:"Collections",col_sub:"The categories visitors browse on the homepage",th_tagline:"Tagline",th_products_count:"Products",
@@ -312,7 +312,7 @@ const I18N={
   empty_products:'لا توجد منتجات بعد. اضغط "إضافة منتج".',no_match:"لا توجد منتجات مطابقة لبحثك.",
   add_product_title:"إضافة منتج",edit_product_title:"تعديل المنتج",product_modal_sub:"يظهر على موقعك فور الحفظ.",
   photos_label:"الصور — الصورة الأولى هي الرئيسية",upload_hint:"اضغط لاختيار الصور، أو اسحبها هنا",uploading:"جاري الرفع…",
-  name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",desc_en:"الوصف / ملاحظات (إنجليزي)",desc_ar:"الوصف / ملاحظات (عربي)",items_label:"عدة قطع (طقم / سلسلة + دلاية) — اختياري. كل قطعة تُحسب بوزنها.",add_item:"+ إضافة قطعة",item_brand_ph:"اسم الماركة (مثال Italian Gold)",item_weight_ph:"الوزن جم",item_making_ph:"مصنعية/جم",item_price_ph:"السعر",items_total:"الإجمالي: {w} جم · {p} ج.م (من القطع)",
+  name_en:"الاسم (إنجليزي)",name_ar:"الاسم (عربي)",collection:"المجموعة",price:"السعر (ج.م)",weight:"الوزن",metal:"المعدن",desc_en:"الوصف / ملاحظات (إنجليزي)",desc_ar:"الوصف / ملاحظات (عربي)",items_label:"عدة قطع (طقم / سلسلة + دلاية) — اختياري. كل قطعة تُحسب بوزنها.",add_item:"+ إضافة قطعة",item_type_ph:"النوع (سلسلة، دلاية…)",item_brand_ph:"اسم الماركة (مثال Italian Gold)",item_weight_ph:"الوزن جم",item_making_ph:"مصنعية/جم",item_price_ph:"السعر",items_total:"الإجمالي: {w} جم · {p} ج.م (من القطع)",
   bestseller_toggle:"عرضه في قسم الأكثر مبيعاً بالصفحة الرئيسية",new_toggle:'إظهار علامة "جديد"',stock_toggle:"متوفّر (ظاهر على الموقع)",
   cancel:"إلغاء",save_product:"حفظ المنتج",saving:"جاري الحفظ…",confirm_delete:'حذف "{name}" من الموقع؟ لا يمكن التراجع.',
   col_title:"المجموعات",col_sub:"الفئات التي يتصفّحها الزوار في الصفحة الرئيسية",th_tagline:"الوصف المختصر",th_products_count:"عدد المنتجات",
@@ -475,13 +475,15 @@ const productOverlay=$("productOverlay");let editingId=null,photos=[],editorItem
 /* ---- multi-piece (sets) editor: each piece = brand name, weight, making/gram, price ---- */
 function renderItems(){
   $("itemsList").innerHTML=editorItems.map((it,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.5rem;align-items:center;flex-wrap:wrap">
-    <input class="it-name" data-i="${i}" placeholder="${t('item_brand_ph')}" value="${esc(it.name||'')}" style="flex:1.4;min-width:120px">
+    <input class="it-name" data-i="${i}" placeholder="${t('item_type_ph')}" value="${esc(it.name||'')}" style="flex:1;min-width:96px">
+    <input class="it-brand" data-i="${i}" placeholder="${t('item_brand_ph')}" value="${esc(it.brand||'')}" style="flex:1.1;min-width:106px">
     <input class="it-weight" data-i="${i}" placeholder="${t('item_weight_ph')}" value="${esc(it.weight||'')}" style="flex:.7;min-width:64px" inputmode="decimal">
     <input class="it-making" data-i="${i}" placeholder="${t('item_making_ph')}" value="${esc(it.making||'')}" style="flex:.8;min-width:74px" inputmode="decimal">
     <input class="it-price" data-i="${i}" placeholder="${t('item_price_ph')}" value="${esc(it.price||'')}" style="flex:1;min-width:90px">
     <button type="button" class="icon-btn danger it-del" data-i="${i}" style="flex:none;width:36px">✕</button></div>`).join("");
   const recompute=(i)=>{const it=editorItems[i];if((Number(it.making)||0)>0){const v=itemComputedPrice(it,PRICING.gold||0);it.price=v?`EGP ${fmtEGP(v)}`:"";const pin=$("itemsList").querySelector('.it-price[data-i="'+i+'"]');if(pin)pin.value=it.price;}updateItemsTotal();};
   $("itemsList").querySelectorAll(".it-name").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].name=el.value;});
+  $("itemsList").querySelectorAll(".it-brand").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].brand=el.value;});
   $("itemsList").querySelectorAll(".it-weight").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].weight=el.value;recompute(+el.dataset.i);});
   $("itemsList").querySelectorAll(".it-making").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].making=el.value;recompute(+el.dataset.i);});
   $("itemsList").querySelectorAll(".it-price").forEach(el=>el.oninput=()=>{editorItems[+el.dataset.i].price=el.value;updateItemsTotal();});
@@ -492,7 +494,7 @@ function updateItemsTotal(){
   if(!editorItems.length){$("itemsTotal").textContent="";return;}
   $("itemsTotal").textContent=t("items_total",{w:itemsWeight(editorItems),p:fmtEGP(itemsTotal(editorItems,PRICING.gold||0))});
 }
-$("addItemBtn").onclick=()=>{editorItems.push({name:"",weight:"",making:"",price:""});renderItems();};
+$("addItemBtn").onclick=()=>{editorItems.push({name:"",brand:"",weight:"",making:"",price:""});renderItems();};
 function fillColSelect(){$("fCol").innerHTML=COLLECTIONS.map(c=>`<option value="${esc(c.key)}">${esc(c.title)}</option>`).join("");}
 function drawPreviews(){$("uploadPreview").innerHTML=photos.map((ph,i)=>`<div class="ph"><img src="${esc(ph.url)}">${i===0?`<span class="main">${t("main_tag")}</span>`:""}<span class="x" data-rm="${i}">✕</span></div>`).join("");$("uploadPreview").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.rm,1);drawPreviews();});}
 function openProductModal(p){
@@ -526,7 +528,7 @@ $("productForm").addEventListener("submit",async e=>{
   e.preventDefault();const name=$("fName").value.trim();if(!name)return toast(t("need_name"),true);
   const metal=$("fMetal").value.trim();
   // multi-piece products (sets): totals come from the pieces; otherwise use the single fields
-  const items=editorItems.filter(it=>(it.name||"").trim()||parseWeight(it.weight)>0||String(it.price||"").trim());
+  const items=editorItems.filter(it=>(it.name||"").trim()||(it.brand||"").trim()||parseWeight(it.weight)>0||String(it.price||"").trim());
   let weight,weightAr,priceRaw,extra={};
   if(items.length){
     const g=PRICING.gold||0;
