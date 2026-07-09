@@ -68,6 +68,7 @@
           name: p.name, name_ar: p.name_ar || p.name,
           price: p.price || "", price_ar: p.price_ar || p.price || "",
           weight: p.weight || "", weight_ar: p.weight_ar || p.weight || "",
+          items: p.items || [],
           isNew: !!p.new_arrival, images,
           desc: p.description || "", desc_ar: p.description_ar || p.description || "",
           specs: p.specs || {}, specs_ar: p.specs_ar || {}, _wa: p.whatsapp_message || ""
