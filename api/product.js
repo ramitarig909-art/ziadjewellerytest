@@ -1,8 +1,4 @@
-/* =====================================================================
- *  /product/<slug>  — individual product page (Vercel serverless).
- *  READ-ONLY: fetches the product from Supabase and renders an SEO-ready
- *  page. Does not touch index.html, the dashboard, or any data.
- * ===================================================================== */
+/* /product/<slug> — individual product page (Vercel serverless). READ-ONLY. */
 const SUPABASE_URL = "https://mwpkmzsryrywldkzuacs.supabase.co";
 const ANON = "sb_publishable_MIpqtLl-tVXX6Lgquq0p5Q_gdo32rKJ";
 const SITE = "https://ziadjewellery.com";
@@ -89,6 +85,7 @@ module.exports = async (req, res) => {
           ${p.weight ? `<div><span>Weight</span> ${esc(p.weight)}</div>` : ""}
           ${p.metal ? `<div><span>Metal</span> ${esc(p.metal)}</div>` : ""}
         </div>
+        ${(Array.isArray(p.items) && p.items.length) ? `<div class="pieces"><span class="pieces-lbl">This set includes</span>${p.items.map((it) => `<div class="piece">${esc(it.name || "Piece")}${it.weight ? ` — ${esc(it.weight)}` : ""}${it.price ? ` — ${esc(it.price)}` : ""}</div>`).join("")}</div>` : ""}
         ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ""}
         ${p.description_ar ? `<p class="desc" dir="rtl">${esc(p.description_ar)}</p>` : ""}
         <a class="wa" href="https://wa.me/${esc(wa)}?text=${waMsg}" target="_blank" rel="noopener">
@@ -134,6 +131,9 @@ h1{font-family:var(--serif);font-weight:500;font-size:2.3rem;line-height:1.1}
 .price{font-family:var(--serif);font-size:1.9rem;color:var(--gold-deep);margin:1rem 0}
 .specs{display:flex;gap:1.6rem;flex-wrap:wrap;margin:1rem 0;font-size:.92rem}
 .specs span{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pieces{margin:1.1rem 0;border-top:1px solid rgba(184,146,61,.2);padding-top:1rem}
+.pieces-lbl{display:block;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.piece{color:var(--ink);font-size:.92rem;padding:.15rem 0}
 .desc{color:var(--ink);margin:1rem 0;max-width:52ch}
 .wa{display:inline-flex;align-items:center;gap:.6rem;margin-top:1.4rem;background:linear-gradient(120deg,var(--gold-deep),var(--gold));color:#241402;font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:.82rem;padding:.9rem 1.6rem;border-radius:3px;text-decoration:none}
 .wa:hover{filter:brightness(1.06)}
