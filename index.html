@@ -1175,8 +1175,7 @@ function fillModal(p){
   const weight=LANG==='ar'?(p.weight_ar||'عند الطلب'):(p.weight||'On request');
   let rows='';
   if(p.items&&p.items.length){p.items.forEach(it=>{if(it.name||it.brand||it.weight||it.price)rows+=`<div class="row"><span class="k">${[it.brand,it.name].filter(Boolean).join(' ')}</span><span class="v">${[it.weight,it.price].filter(Boolean).join(' · ')}</span></div>`;});}
-  else{rows=`<div class="row"><span class="k">${T.spec_weight[LANG]}</span><span class="v">${weight}</span></div>`;}
-  for(const k in sp){rows+=`<div class="row"><span class="k">${k}</span><span class="v">${sp[k]}</span></div>`;}
+  else{rows=`<div class="row"><span class="k">${T.spec_weight[LANG]}</span><span class="v">${weight}</span></div>`;for(const k in sp){rows+=`<div class="row"><span class="k">${k}</span><span class="v">${sp[k]}</span></div>`;}}
   specs.innerHTML=rows;
   document.getElementById('mAskTxt').textContent=T.ask_btn[LANG];
   document.getElementById('mShareTxt').textContent=T.share_btn[LANG];
