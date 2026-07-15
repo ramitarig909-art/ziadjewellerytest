@@ -99,7 +99,8 @@ module.exports = async (req, res) => {
       </div>
     </div>
   </main>
-  <footer class="foot">© ${new Date().getFullYear()} ZIAD Jewellery · Nasr City, Cairo · <a href="/">ziadjewellery.com</a></footer>`;
+  <footer class="foot">© ${new Date().getFullYear()} ZIAD Jewellery · Nasr City, Cairo · <a href="/">ziadjewellery.com</a></footer>
+  <script>window.addEventListener("load",function(){if(window.trackViewContent)trackViewContent(${JSON.stringify(p.name || "")});});</script>`;
 
   res.setHeader("Cache-Control", "public, max-age=0, s-maxage=600, must-revalidate");
   res.status(200).send(shell(title, body, head));
@@ -108,6 +109,23 @@ module.exports = async (req, res) => {
 function shell(title, body, extraHead = "") {
   return `<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2084830798733485');
+fbq('track', 'PageView');
+console.log('PageView Fired');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2084830798733485&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
+<script src="/assets/js/pixel.js"></script>
 ${extraHead || `<title>${title}</title>`}
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />

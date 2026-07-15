@@ -431,6 +431,23 @@ html[dir="rtl"] .hero p,html[dir="rtl"] .contact-info > p{margin-left:auto;margi
 </style>
 <style>html{-webkit-text-size-adjust:100%}img,svg,video{max-width:100%;height:auto}*{-webkit-tap-highlight-color:transparent}@media(max-width:560px){.nav-links a,.wa-btn,.btn,button{min-height:44px}.prod-body{padding:.85rem}.prod-body h3{font-size:1rem}}@media(max-width:380px){.prod-grid{gap:.7rem}}</style><meta name="application-name" content="ZIAD Jewellery" /><meta name="apple-mobile-web-app-title" content="ZIAD Jewellery" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="mobile-web-app-capable" content="yes" /><meta name="format-detection" content="telephone=yes" /><meta name="rating" content="general" /><meta property="og:image:alt" content="ZIAD Jewellery — fine gold jewellery, Nasr City, Cairo" />
 <style>html{scroll-behavior:smooth}a,button,.btn,.icon-btn,input,select,textarea{touch-action:manipulation}.wa-choice-card{max-height:85vh;overflow:auto;-webkit-overflow-scrolling:touch}.wa-choice-opt{min-height:50px}.wa-choice-x{width:40px;height:40px}@media(max-width:560px){.wa-choice-card{padding:1.3rem 1.1rem}.wa-choice-opt{font-size:.9rem}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}</style>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2084830798733485');
+fbq('track', 'PageView');
+console.log('PageView Fired');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2084830798733485&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
+<script src="/assets/js/pixel.js"></script>
 </head>
 <body class="locked">
 
@@ -1197,6 +1214,8 @@ function showModalProduct(i){
 function navModal(dir){showModalProduct(modalIdx+dir);}
 function openModal(id,listIds){
   const p=products.find(x=>x.id===id); if(!p)return;
+  if(window.trackViewContent)trackViewContent(p.name);
+
   modalList=(listIds&&listIds.length)?listIds.slice():products.map(x=>x.id);
   modalIdx=modalList.indexOf(id); if(modalIdx<0){modalList=[id];modalIdx=0;}
   currentProduct=p; fillModal(p);
