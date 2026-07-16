@@ -27,6 +27,7 @@
   };
 
   document.addEventListener("click", function (e) {
+    
     if (!e.target || !e.target.closest) return;
     var el = e.target.closest('a[href*="wa.me"], a[href*="api.whatsapp.com"], a[href*="whatsapp.com/send"]');
     if (el) window.trackContact();
