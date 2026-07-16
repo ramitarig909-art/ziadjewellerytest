@@ -120,8 +120,11 @@ t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '2084830798733485');
-fbq('track', 'PageView');
-console.log('PageView Fired');
+if (!window.__ziadPageViewFired) {
+  window.__ziadPageViewFired = true;
+  fbq('track', 'PageView');
+  console.log('PageView Fired');
+}
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2084830798733485&ev=PageView&noscript=1"/></noscript>
 <!-- End Meta Pixel Code -->
