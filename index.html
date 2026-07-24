@@ -43,7 +43,7 @@
   "image": "https://ziadjewellery.com/og-image.png",
   "@id": "https://www.facebook.com/p/Ziad-Jewellery-61564944060835/",
   "url": "https://www.facebook.com/p/Ziad-Jewellery-61564944060835/",
-  "telephone": "+20 122 770 9928",
+  "telephone": "+20 100 525 7075",
   "email": "Jewelleryziad@gmail.com",
   "priceRange": "$$$",
   "description": "Luxury fine jewellery house crafting timeless gold pieces in Nasr City, Cairo.",
@@ -1100,7 +1100,7 @@ const reviews=[
 function waUrl(num,m){return `https://wa.me/${num}?text=${encodeURIComponent(m)}`;}
 function waLink(m){return waUrl(WHATSAPP_NUMBER,m);}
 const _wc=()=>document.getElementById("waChoice");
-function openWaChoice(msg){const o1=document.getElementById("waOpt1"),o2=document.getElementById("waOpt2");o1.href=waUrl(WA_NUMBERS[0].num,msg);o2.href=waUrl(WA_NUMBERS[1].num,msg);document.getElementById("waChoiceTitle").textContent=(LANG==="ar"?"راسلونا على واتساب · اختاري الرقم":"Chat on WhatsApp · choose a number");_wc().classList.add("open");_wc().setAttribute("aria-hidden","false");}
+function openWaChoice(msg){const list=(typeof WA_NUMBERS!=="undefined"&&WA_NUMBERS.length)?WA_NUMBERS:[{num:WHATSAPP_NUMBER,disp:"+"+WHATSAPP_NUMBER}];if(list.length<2){window.open(waUrl(list[0].num,msg),"_blank","noopener");return;}const o1=document.getElementById("waOpt1"),o2=document.getElementById("waOpt2");function fill(el,n){if(!el)return;el.href=waUrl(n.num,msg);const s=el.querySelector("span");if(s)s.textContent=n.disp||("+"+n.num);el.style.display="";}fill(o1,list[0]);fill(o2,list[1]);document.getElementById("waChoiceTitle").textContent=(LANG==="ar"?"راسلونا على واتساب · اختاري الرقم":"Chat on WhatsApp · choose a number");_wc().classList.add("open");_wc().setAttribute("aria-hidden","false");}
 function closeWaChoice(){_wc().classList.remove("open");_wc().setAttribute("aria-hidden","true");}
 function productLink(p){return `${SITE_URL}#product=${p.id}`;}
 function askMessage(p){
