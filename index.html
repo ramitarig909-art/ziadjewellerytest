@@ -201,7 +201,7 @@ section[id],header[id]{scroll-margin-top:84px}
 .col-card .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(transparent 40%,rgba(28,23,18,.72))}
 .col-meta{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;padding:1.8rem;text-align:left;color:#fff}
 .col-meta h3{font-size:1.85rem;margin-bottom:.2rem;font-weight:500}
-.col-meta .v{font-size:.68rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold-bright);opacity:0;transform:translateY(8px);transition:.5s var(--ease)}
+.col-meta .v{font-size:.68rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold-bright);opacity:1;transform:none;transition:.5s var(--ease)}
 .col-card:hover .v{opacity:1;transform:translateY(0)}
 .col-card .corner{position:absolute;top:1.2rem;right:1.2rem;z-index:2;width:30px;height:30px;border-top:1px solid var(--gold-bright);border-right:1px solid var(--gold-bright);opacity:0;transition:.5s}
 .col-card:hover .corner{opacity:1}
@@ -374,6 +374,9 @@ html[dir="rtl"] .hero p,html[dir="rtl"] .contact-info > p{margin-left:auto;margi
 }
 @media(max-width:560px){
   .col-grid{grid-template-columns:1fr 1fr;gap:.9rem}
+  .col-meta{padding:1rem .95rem}
+  .col-meta h3{font-size:1.2rem}
+  .col-meta .v{font-size:.6rem;letter-spacing:.16em;margin-bottom:.2rem}
   .prod-grid{grid-template-columns:1fr 1fr;gap:.9rem}
   .why-grid{grid-template-columns:1fr}
   .hero-cta .btn,.contact-cta .btn{flex:1}
