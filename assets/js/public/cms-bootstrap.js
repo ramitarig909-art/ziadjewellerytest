@@ -5,7 +5,7 @@
  *  website WITHOUT changing any markup or design:
  *    1. text   -> merged into the site's `T` translation map (data-k)
  *    2. collections / products -> replace the global arrays
- *    3. contact/WhatsApp -> updated links
+ *    3. contact/WhatsApp -> updated links + displayed numbers
  *  Then the site's own render functions are re-run.
  *
  *  The original hardcoded content stays in place as an instant-paint
