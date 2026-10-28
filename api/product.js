@@ -12,11 +12,16 @@ async function sb(path) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
     });
-    return r.ok ? await r.json() : [];
-  } catch (e) { return []; }
+    return r.ok ? await r.json() : null;   // null = database unreachable
+  } catch (e) { return null; }
 }
 const esc = (s = "") => String(s).replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// Supabase photos go through Vercel's image CDN (resized, cached 31 days);
+// the <img> falls back to the direct Supabase URL if the CDN can't serve it.
+const cdn = (u, w) => (u && u.indexOf(SUPABASE_URL) === 0)
+  ? `/_vercel/image?url=${encodeURIComponent(u)}&w=${w}&q=75` : u;
+const FB = "if(!this.__f&&this.dataset.raw){this.__f=1;this.src=this.dataset.raw}";
 
 module.exports = async (req, res) => {
   const slug = (req.query && req.query.slug ? req.query.slug : "").toString();
@@ -25,6 +30,14 @@ module.exports = async (req, res) => {
   if (!slug) { res.status(404).send(shell("Not found", "<div class='wrap'><h1>Product not found</h1><p><a href='/'>← Back to ZIAD Jewellery</a></p></div>")); return; }
 
   const rows = await sb(`products?slug=eq.${encodeURIComponent(slug)}&select=*,product_images(url,is_main,display_order)&limit=1`);
+  // Database unreachable: "try again later" (503), not "not found" (404),
+  // so Google keeps the page indexed instead of dropping it.
+  if (rows === null) {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Retry-After", "3600");
+    res.status(503).send(shell("Temporarily unavailable", "<div class='wrap'><h1>This page is temporarily unavailable</h1><p>Please try again shortly, or <a href='/'>browse ZIAD Jewellery</a>.</p></div>"));
+    return;
+  }
   const p = rows[0];
   if (!p) { res.status(404).send(shell("Not found", "<div class='wrap'><h1>Product not found</h1><p><a href='/'>← Back to ZIAD Jewellery</a></p></div>")); return; }
 
@@ -38,7 +51,7 @@ module.exports = async (req, res) => {
   const desc = (p.seo_description || p.description || `${p.name} — fine gold jewellery handcrafted by ZIAD Jewellery, Nasr City, Cairo.`).replace(/\s+/g, " ").slice(0, 300);
   const priceNum = (p.price || "").replace(/[^\d.]/g, "");
 
-  const contact = (await sb(`settings?key=eq.contact&select=value&limit=1`))[0]?.value || {};
+  const contact = ((await sb(`settings?key=eq.contact&select=value&limit=1`)) || [])[0]?.value || {};
   const wa = contact.whatsapp_1 || "201227709928";
   const waMsg = encodeURIComponent(`Hello ZIAD Jewellery — I'd like more information about ${p.name}${p.price ? ` (${p.price})` : ""}.\n${url}`);
 
@@ -68,7 +81,7 @@ module.exports = async (req, res) => {
     <script type="application/ld+json">${JSON.stringify(jsonld)}</script>`;
 
   const thumbs = images.map((u, i) =>
-    `<img src="${esc(u)}" class="thumb${i === 0 ? " active" : ""}" onclick="document.getElementById('main').src=this.src;document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')" alt="${esc(p.name)}" />`).join("");
+    `<img src="${esc(cdn(u, 640))}" data-full="${esc(cdn(u, 1200))}" data-raw="${esc(u)}" class="thumb${i === 0 ? " active" : ""}" onerror="${FB}" onclick="var m=document.getElementById('main');m.__f=0;m.dataset.raw=this.dataset.raw;m.src=this.dataset.full;document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));this.classList.add('active')" alt="${esc(p.name)}" />`).join("");
 
   const oos = p.in_stock === false ? `<span class="oos">Out of Stock</span>` : "";
   const body = `
@@ -77,7 +90,7 @@ module.exports = async (req, res) => {
     <a href="/#collections" class="back">← Back to collections</a>
     <div class="product">
       <div class="gallery">
-        <div class="main-wrap">${oos}<img id="main" src="${esc(img)}" alt="${esc(p.name)}" /></div>
+        <div class="main-wrap">${oos}<img id="main" src="${esc(cdn(img, 1200))}" data-raw="${esc(img)}" onerror="${FB}" alt="${esc(p.name)}" /></div>
         ${images.length > 1 ? `<div class="thumbs">${thumbs}</div>` : ""}
       </div>
       <div class="info">
