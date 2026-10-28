@@ -8,13 +8,22 @@ const ANON = "sb_publishable_MIpqtLl-tVXX6Lgquq0p5Q_gdo32rKJ";
 const SITE = "https://ziadjewellery.com";
 
 module.exports = async (req, res) => {
-  let products = [];
+  let products = null;
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/products?select=slug,updated_at&order=display_order`, {
       headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
     });
     if (r.ok) products = await r.json();
-  } catch (e) { /* fall back to homepage-only */ }
+  } catch (e) { /* handled below */ }
+
+  // Database unreachable: say "try again later" (503) instead of serving a
+  // homepage-only sitemap, which would tell Google the products were removed.
+  if (!Array.isArray(products)) {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Retry-After", "3600");
+    res.status(503).send("Sitemap temporarily unavailable");
+    return;
+  }
 
   const enc = (s = "") => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
   let urls = `<url><loc>${SITE}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>`;
